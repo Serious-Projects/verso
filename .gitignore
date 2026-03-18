@@ -46,3 +46,4 @@ NOTION_FEATURES_REFERENCE.md
 .claude/
 .agents/
 skills-lock.json
+test-results/
