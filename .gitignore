@@ -40,7 +40,9 @@ yarn-error.log*
 *.tsbuildinfo
 next-env.d.ts
 
-# claude code
+# claude code / agent skills
 CLAUDE.md
 NOTION_FEATURES_REFERENCE.md
 .claude/
+.agents/
+skills-lock.json
