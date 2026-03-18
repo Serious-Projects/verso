@@ -1,13 +1,21 @@
-import { TooltipProvider } from "@/components/ui/tooltip";
-import { GeistMono } from "geist/font/mono";
 import type { Metadata } from "next";
 import { ThemeProvider } from "next-themes";
-import { Inter } from "next/font/google";
+import { Fira_Code, Plus_Jakarta_Sans } from "next/font/google";
+
+import { TooltipProvider } from "@/components/ui/tooltip";
+
 import "./globals.css";
 
-const inter = Inter({
+const plusJakarta = Plus_Jakarta_Sans({
   variable: "--font-sans",
   subsets: ["latin"],
+  display: "swap",
+});
+
+const firaCode = Fira_Code({
+  variable: "--font-code",
+  subsets: ["latin"],
+  display: "swap",
 });
 
 export const metadata: Metadata = {
@@ -22,7 +30,7 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en" suppressHydrationWarning>
-      <body className={`${inter.variable} ${GeistMono.variable} antialiased`}>
+      <body className={`${plusJakarta.variable} ${firaCode.variable} antialiased`}>
         <ThemeProvider
           attribute="class"
           defaultTheme="system"

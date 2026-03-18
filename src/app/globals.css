@@ -7,8 +7,8 @@
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
-  --font-sans: var(--font-sans);
-  --font-mono: var(--font-geist-mono);
+  --font-sans: "Plus Jakarta Sans", ui-sans-serif, system-ui, sans-serif;
+  --font-mono: "Fira Code", ui-monospace, monospace;
   --color-sidebar-ring: var(--sidebar-ring);
   --color-sidebar-border: var(--sidebar-border);
   --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
@@ -185,4 +185,308 @@
   html {
     @apply font-sans;
   }
+}
+
+/* ============================================================================
+   EDITOR TYPOGRAPHY — replaces @tailwindcss/typography (not compatible with v4)
+   ============================================================================ */
+
+.verso-editor {
+  color: var(--foreground);
+  line-height: 1.7;
+}
+
+/* Headings */
+.verso-editor h1 {
+  font-size: 2rem;
+  font-weight: 700;
+  line-height: 1.2;
+  margin: 1.5rem 0 0.75rem;
+  letter-spacing: -0.025em;
+}
+
+.verso-editor h2 {
+  font-size: 1.5rem;
+  font-weight: 650;
+  line-height: 1.3;
+  margin: 1.25rem 0 0.5rem;
+  letter-spacing: -0.02em;
+}
+
+.verso-editor h3 {
+  font-size: 1.25rem;
+  font-weight: 600;
+  line-height: 1.4;
+  margin: 1rem 0 0.4rem;
+  letter-spacing: -0.015em;
+}
+
+.verso-editor h1:first-child,
+.verso-editor h2:first-child,
+.verso-editor h3:first-child {
+  margin-top: 0;
+}
+
+/* Paragraphs */
+.verso-editor p {
+  margin: 0.4rem 0;
+}
+
+/* Links */
+.verso-editor a {
+  color: var(--primary);
+  text-decoration: underline;
+  text-underline-offset: 2px;
+}
+
+.verso-editor a:hover {
+  opacity: 0.8;
+}
+
+/* Bold & italic */
+.verso-editor strong {
+  font-weight: 650;
+}
+
+/* Lists */
+.verso-editor ul {
+  list-style-type: disc;
+  padding-left: 1.5rem;
+  margin: 0.4rem 0;
+}
+
+.verso-editor ol {
+  list-style-type: decimal;
+  padding-left: 1.5rem;
+  margin: 0.4rem 0;
+}
+
+.verso-editor li {
+  margin: 0.15rem 0;
+}
+
+.verso-editor li > p {
+  margin: 0;
+}
+
+.verso-editor li > ul,
+.verso-editor li > ol {
+  margin: 0;
+}
+
+/* Inline code */
+.verso-editor code {
+  font-family: var(--font-mono);
+  font-size: 0.875em;
+  background: var(--muted);
+  border-radius: 0.25rem;
+  padding: 0.15rem 0.35rem;
+}
+
+.verso-editor pre code {
+  background: none;
+  padding: 0;
+  font-size: inherit;
+  border-radius: 0;
+}
+
+/* Horizontal rule */
+.verso-editor hr {
+  border: none;
+  border-top: 1px solid var(--border);
+  margin: 1.5rem 0;
+}
+
+/* Images */
+.verso-editor img {
+  max-width: 100%;
+  height: auto;
+  border-radius: 0.375rem;
+  margin: 0.75rem 0;
+}
+
+/* ============================================================================
+   EDITOR BLOCK STYLES
+   ============================================================================ */
+
+/* Task list checkboxes */
+.verso-editor ul[data-type="taskList"] {
+  list-style: none;
+  padding-left: 0;
+}
+
+.verso-editor ul[data-type="taskList"] li {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.5rem;
+}
+
+.verso-editor ul[data-type="taskList"] li > label {
+  flex-shrink: 0;
+  margin-top: 0.25rem;
+}
+
+.verso-editor ul[data-type="taskList"] li > label input[type="checkbox"] {
+  appearance: none;
+  width: 1rem;
+  height: 1rem;
+  border: 2px solid var(--border);
+  border-radius: 0.2rem;
+  cursor: pointer;
+  transition: all 0.15s ease;
+  position: relative;
+  background: transparent;
+}
+
+.verso-editor ul[data-type="taskList"] li > label input[type="checkbox"]:checked {
+  background: var(--primary);
+  border-color: var(--primary);
+}
+
+.verso-editor ul[data-type="taskList"] li > label input[type="checkbox"]:checked::after {
+  content: "";
+  position: absolute;
+  left: 3px;
+  top: 0;
+  width: 5px;
+  height: 9px;
+  border: solid white;
+  border-width: 0 2px 2px 0;
+  transform: rotate(45deg);
+}
+
+.verso-editor ul[data-type="taskList"] li[data-checked="true"] > div > p {
+  text-decoration: line-through;
+  color: var(--muted-foreground);
+}
+
+/* Code block */
+.verso-editor pre {
+  background: var(--muted);
+  border-radius: 0.375rem;
+  padding: 1rem;
+  overflow-x: auto;
+  font-family: var(--font-mono);
+  font-size: 0.875rem;
+  line-height: 1.5;
+  margin: 0.5rem 0;
+}
+
+/* Lowlight syntax highlighting */
+.verso-editor pre .hljs-comment,
+.verso-editor pre .hljs-quote {
+  color: var(--muted-foreground);
+  font-style: italic;
+}
+
+.verso-editor pre .hljs-keyword,
+.verso-editor pre .hljs-selector-tag,
+.verso-editor pre .hljs-built_in {
+  color: oklch(0.65 0.2 330);
+}
+
+.dark .verso-editor pre .hljs-keyword,
+.dark .verso-editor pre .hljs-selector-tag,
+.dark .verso-editor pre .hljs-built_in {
+  color: oklch(0.75 0.15 330);
+}
+
+.verso-editor pre .hljs-string,
+.verso-editor pre .hljs-attr {
+  color: oklch(0.6 0.15 145);
+}
+
+.dark .verso-editor pre .hljs-string,
+.dark .verso-editor pre .hljs-attr {
+  color: oklch(0.72 0.12 145);
+}
+
+.verso-editor pre .hljs-number,
+.verso-editor pre .hljs-literal {
+  color: oklch(0.6 0.16 55);
+}
+
+.verso-editor pre .hljs-title,
+.verso-editor pre .hljs-section,
+.verso-editor pre .hljs-name {
+  color: oklch(0.6 0.18 250);
+}
+
+.dark .verso-editor pre .hljs-title,
+.dark .verso-editor pre .hljs-section,
+.dark .verso-editor pre .hljs-name {
+  color: oklch(0.72 0.14 250);
+}
+
+/* Blockquote styling */
+.verso-editor blockquote {
+  border-left: 3px solid var(--border);
+  padding-left: 1rem;
+  color: var(--muted-foreground);
+  margin: 0.5rem 0;
+}
+
+/* Page title placeholder — :empty doesn't work with contentEditable (browser inserts <br>) */
+.page-title:empty::before,
+.page-title br:only-child {
+  display: block;
+}
+.page-title:empty::before {
+  content: attr(data-placeholder);
+  color: var(--muted-foreground);
+  opacity: 0.4;
+  pointer-events: none;
+}
+.page-title.is-empty::before {
+  content: attr(data-placeholder);
+  color: var(--muted-foreground);
+  opacity: 0.4;
+  pointer-events: none;
+  float: left;
+  height: 0;
+}
+
+/* Placeholder styles for all block types */
+.verso-editor p.is-empty::before,
+.verso-editor h1.is-empty::before,
+.verso-editor h2.is-empty::before,
+.verso-editor h3.is-empty::before {
+  content: attr(data-placeholder);
+  float: left;
+  color: var(--muted-foreground);
+  pointer-events: none;
+  height: 0;
+}
+
+/* Toggle block styles */
+.toggle-block {
+  border-radius: 0.375rem;
+  padding: 0.25rem 0;
+}
+
+.toggle-trigger {
+  border: none;
+  background: none;
+  padding: 0.25rem;
+}
+
+.toggle-trigger:hover {
+  background: var(--muted);
+  border-radius: 0.25rem;
+}
+
+/* Callout emoji */
+.callout-emoji {
+  cursor: default;
+}
+
+/* Selection highlight */
+.verso-editor .selection,
+.verso-editor *::selection {
+  background: oklch(0.666 0.16 55 / 0.2);
+}
+
+.dark .verso-editor .selection,
+.dark .verso-editor *::selection {
+  background: oklch(0.72 0.17 55 / 0.25);
 }

@@ -1,24 +1,25 @@
 "use client";
 
-import { useEditorStore } from "@/stores/editor-store";
-import { ThemeToggle } from "./theme-toggle";
+import { AnimatePresence, motion } from "framer-motion";
+import {
+  FileText,
+  PanelLeft,
+  PanelLeftClose,
+  Plus,
+  Search,
+  Settings,
+} from "lucide-react";
+
+import { Button } from "@/components/ui/button";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Separator } from "@/components/ui/separator";
-import { Button } from "@/components/ui/button";
 import {
   Tooltip,
   TooltipContent,
   TooltipTrigger,
 } from "@/components/ui/tooltip";
-import {
-  FileText,
-  PanelLeftClose,
-  PanelLeft,
-  Plus,
-  Search,
-  Settings,
-} from "lucide-react";
-import { motion, AnimatePresence } from "framer-motion";
+import { useEditorStore } from "@/stores/editor-store";
+import { ThemeToggle } from "./theme-toggle";
 
 export function Sidebar() {
   const { sidebarOpen, toggleSidebar } = useEditorStore();
