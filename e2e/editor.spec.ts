@@ -58,9 +58,15 @@ async function selectAll(page: Page) {
 
 function freshEditor(fn?: (page: Page) => Promise<void>) {
   return async ({ page }: { page: Page }) => {
+    // Clear all persisted state so each test starts fresh
     await page.goto("/workspace");
-    await page.evaluate(() => localStorage.removeItem("verso-document"));
-    await page.reload();
+    await page.evaluate(() => {
+      localStorage.removeItem("verso-pages");
+      localStorage.removeItem("verso-document");
+    });
+    // Navigate fresh so WorkspacePage creates a new page
+    await page.goto("/workspace");
+    await page.waitForURL(/\/workspace\/.+/, { timeout: 10000 });
     await focusAndClear(page);
     if (fn) await fn(page);
   };
@@ -71,6 +77,8 @@ function freshEditor(fn?: (page: Page) => Promise<void>) {
 test.describe("Editor loads", () => {
   test("workspace page renders with editable editor", async ({ page }) => {
     await page.goto("/workspace");
+    // /workspace redirects to /workspace/[pageId]
+    await page.waitForURL(/\/workspace\/.+/, { timeout: 10000 });
     const editor = await getEditor(page);
     await expect(editor).toBeVisible();
     await expect(editor).toHaveAttribute("contenteditable", "true");
@@ -264,7 +272,9 @@ test.describe("Slash command menu", () => {
 
   test("typing filters items", async ({ page }) => {
     await (await getEditor(page)).click();
-    await page.keyboard.type("/head");
+    await page.keyboard.type("/");
+    await page.waitForTimeout(200); // wait for slash extension setTimeout to activate
+    await page.keyboard.type("head");
     await page.waitForTimeout(300);
     const menu = slashMenu(page);
     await expect(menu).toBeVisible();
@@ -309,12 +319,7 @@ test.describe("Slash command menu", () => {
 
   test("/h1 → Heading 1", async ({ page }) => {
     await (await getEditor(page)).click();
-    await page.keyboard.type("/h1");
-    await page.waitForTimeout(500);
-    const menu = slashMenu(page);
-    await expect(menu).toBeVisible();
-    await page.keyboard.press("Enter");
-    await page.waitForTimeout(300);
+    await slashSelect(page, "heading1");
     await page.keyboard.type("My Heading");
     const html = await getEditorHTML(page);
     expect(html).toContain("<h1>");
@@ -348,11 +353,7 @@ test.describe("Slash command menu", () => {
 
   test("/bullet → Bullet List", async ({ page }) => {
     await (await getEditor(page)).click();
-    await page.keyboard.type("/bullet");
-    await page.waitForTimeout(500);
-    await expect(slashMenu(page)).toBeVisible();
-    await page.keyboard.press("Enter");
-    await page.waitForTimeout(300);
+    await slashSelect(page, "bullet");
     await page.keyboard.type("List item");
     expect(await getEditorHTML(page)).toContain("<ul>");
   });
@@ -382,12 +383,7 @@ test.describe("Slash command menu", () => {
 
   test("/code → Code Block", async ({ page }) => {
     await (await getEditor(page)).click();
-    await page.keyboard.type("/code");
-    await page.waitForTimeout(500);
-    const menu = slashMenu(page);
-    await expect(menu).toBeVisible();
-    await page.keyboard.press("Enter");
-    await page.waitForTimeout(300);
+    await slashSelect(page, "code");
     await page.keyboard.type("let x = 1;");
     expect(await getEditorHTML(page)).toContain("<pre");
   });

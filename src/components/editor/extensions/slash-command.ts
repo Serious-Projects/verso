@@ -1,5 +1,5 @@
-import { Extension, Editor } from "@tiptap/core";
-import { PluginKey, Plugin } from "@tiptap/pm/state";
+import { Editor, Extension } from "@tiptap/core";
+import { Plugin, PluginKey } from "@tiptap/pm/state";
 import { DecorationSet } from "@tiptap/pm/view";
 
 export const SLASH_COMMAND_KEY = new PluginKey("slashCommand");
