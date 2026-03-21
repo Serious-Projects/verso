@@ -1,6 +1,6 @@
 import { Extension } from "@tiptap/core";
-import { Plugin, PluginKey } from "@tiptap/pm/state";
 import { DOMParser as ProseMirrorDOMParser, Slice } from "@tiptap/pm/model";
+import { Plugin, PluginKey } from "@tiptap/pm/state";
 import { marked } from "marked";
 
 const MARKDOWN_PASTE_KEY = new PluginKey("markdownPaste");
@@ -34,17 +34,14 @@ function fixTaskListHtml(html: string): string {
     (match) => {
       const isChecked = /checked/i.test(match);
       return `<li data-type="taskItem" data-checked="${isChecked}"><p>`;
-    }
+    },
   );
 }
 
 // Wrap task list <ul> containing taskItems with data-type="taskList"
 function fixTaskListWrappers(html: string): string {
   // If a <ul> contains <li data-type="taskItem">, mark it as a taskList
-  return html.replace(
-    /<ul>\s*(<li data-type="taskItem")/g,
-    '<ul data-type="taskList">$1'
-  );
+  return html.replace(/<ul>\s*(<li data-type="taskItem")/g, '<ul data-type="taskList">$1');
 }
 
 // Convert table HTML to readable text since we don't have table blocks yet

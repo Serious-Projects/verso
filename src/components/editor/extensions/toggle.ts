@@ -46,20 +46,16 @@ export const ToggleBlock = Node.create<ToggleOptions>({
       "div",
       mergeAttributes(this.options.HTMLAttributes, HTMLAttributes, {
         "data-type": "toggle",
-        class: "toggle-block my-1",
+        "class": "toggle-block my-1",
       }),
       [
         "button",
         {
-          class: `toggle-trigger flex items-center gap-1 cursor-pointer select-none text-muted-foreground hover:text-foreground transition-colors ${isOpen ? "rotate-90" : ""}`,
-          contenteditable: "false",
+          "class": `toggle-trigger flex items-center gap-1 cursor-pointer select-none text-muted-foreground hover:text-foreground transition-colors ${isOpen ? "rotate-90" : ""}`,
+          "contenteditable": "false",
           "data-toggle-trigger": "true",
         },
-        [
-          "span",
-          { class: "toggle-icon text-xs transition-transform" },
-          "▶",
-        ],
+        ["span", { class: "toggle-icon text-xs transition-transform" }, "▶"],
       ],
       [
         "div",
@@ -110,18 +106,13 @@ export const ToggleBlock = Node.create<ToggleOptions>({
         "cursor-pointer",
         "select-none",
         "text-muted-foreground",
-        "py-0.5"
+        "py-0.5",
       );
       trigger.contentEditable = "false";
       trigger.type = "button";
 
       const icon = document.createElement("span");
-      icon.classList.add(
-        "toggle-icon",
-        "text-xs",
-        "transition-transform",
-        "inline-block"
-      );
+      icon.classList.add("toggle-icon", "text-xs", "transition-transform", "inline-block");
       icon.textContent = "▶";
       if (node.attrs.open) {
         icon.style.transform = "rotate(90deg)";

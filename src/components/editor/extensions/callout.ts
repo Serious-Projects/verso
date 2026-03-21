@@ -46,8 +46,7 @@ export const Callout = Node.create<CalloutOptions>({
       "div",
       mergeAttributes(this.options.HTMLAttributes, HTMLAttributes, {
         "data-type": "callout",
-        class:
-          "callout flex gap-3 rounded-md border border-border bg-muted/50 p-4 my-2",
+        "class": "callout flex gap-3 rounded-md border border-border bg-muted/50 p-4 my-2",
       }),
       [
         "span",

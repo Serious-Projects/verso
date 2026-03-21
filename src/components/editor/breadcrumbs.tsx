@@ -1,8 +1,8 @@
 "use client";
 
-import { Fragment, useMemo } from "react";
-import Link from "next/link";
 import { motion } from "framer-motion";
+import Link from "next/link";
+import { Fragment, useMemo } from "react";
 
 import { usePageStore } from "@/stores/page-store";
 
@@ -49,7 +49,7 @@ export function Breadcrumbs({ pageId }: BreadcrumbsProps) {
             <span className="shrink-0 text-[11px] leading-none opacity-80 group-hover:opacity-100 transition-opacity">
               {ancestor.icon}
             </span>
-            <span className="truncate max-w-[120px] tracking-[-0.01em]">
+            <span className="truncate max-w-30 tracking-[-0.01em]">
               {ancestor.title || "Untitled"}
             </span>
           </Link>
@@ -67,7 +67,7 @@ export function Breadcrumbs({ pageId }: BreadcrumbsProps) {
       {/* Current page — slightly more prominent, non-interactive */}
       <span className="flex items-center gap-1.5 px-1.5 py-1 text-[12px] font-medium text-muted-foreground/65 min-w-0 pointer-events-none">
         <span className="shrink-0 text-[11px] leading-none">{currentPage?.icon}</span>
-        <span className="truncate max-w-[140px] tracking-[-0.01em]">
+        <span className="truncate max-w-35 tracking-[-0.01em]">
           {currentPage?.title || "Untitled"}
         </span>
       </span>

@@ -1,21 +1,21 @@
 "use client";
 
-import { useEffect, useRef, useState, useCallback, useMemo } from "react";
 import { Editor } from "@tiptap/react";
 import {
-  Type,
+  CheckSquare,
+  ChevronRight,
+  Code,
   Heading1,
   Heading2,
   Heading3,
+  Lightbulb,
   List,
   ListOrdered,
-  CheckSquare,
-  Quote,
-  Code,
-  Lightbulb,
-  ChevronRight,
   Minus,
+  Quote,
+  Type,
 } from "lucide-react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 
 import { dismissSlashCommand } from "../extensions/slash-command";
 

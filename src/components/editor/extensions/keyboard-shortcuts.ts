@@ -7,12 +7,9 @@ export const KeyboardShortcuts = Extension.create({
     return {
       // Block type shortcuts (Notion-compatible)
       "Mod-Shift-0": () => this.editor.commands.setParagraph(),
-      "Mod-Shift-1": () =>
-        this.editor.commands.toggleHeading({ level: 1 }),
-      "Mod-Shift-2": () =>
-        this.editor.commands.toggleHeading({ level: 2 }),
-      "Mod-Shift-3": () =>
-        this.editor.commands.toggleHeading({ level: 3 }),
+      "Mod-Shift-1": () => this.editor.commands.toggleHeading({ level: 1 }),
+      "Mod-Shift-2": () => this.editor.commands.toggleHeading({ level: 2 }),
+      "Mod-Shift-3": () => this.editor.commands.toggleHeading({ level: 3 }),
       "Mod-Shift-4": () => this.editor.commands.toggleBulletList(),
       "Mod-Shift-5": () => this.editor.commands.toggleOrderedList(),
       "Mod-Shift-6": () => this.editor.commands.toggleTaskList(),
@@ -35,10 +32,7 @@ export const KeyboardShortcuts = Extension.create({
         const node = state.doc.nodeAt(blockStart);
         if (!node) return false;
 
-        this.editor
-          .chain()
-          .insertContentAt(blockEnd, node.toJSON())
-          .run();
+        this.editor.chain().insertContentAt(blockEnd, node.toJSON()).run();
         return true;
       },
 
@@ -49,10 +43,7 @@ export const KeyboardShortcuts = Extension.create({
         const blockStart = $from.before(1);
         const blockEnd = $from.after(1);
 
-        this.editor
-          .chain()
-          .deleteRange({ from: blockStart, to: blockEnd })
-          .run();
+        this.editor.chain().deleteRange({ from: blockStart, to: blockEnd }).run();
         return true;
       },
     };
