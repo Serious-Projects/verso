@@ -84,12 +84,12 @@ export function Sidebar() {
           >
             {/* Header */}
             <div className="flex items-center justify-between px-3 py-3 border-b border-sidebar-border/50">
-              <div className="flex items-center gap-2.5">
-                <div className="flex h-6 w-6 shrink-0 items-center justify-center rounded-lg bg-linear-to-br from-amber-400 to-amber-600 shadow-sm">
-                  <span className="text-[9px] font-black text-white select-none tracking-tighter">
-                    V
-                  </span>
-                </div>
+              <div className="flex items-center gap-2">
+                <img
+                  src="/images/only-logo-no-text.png"
+                  alt="Verso logo"
+                  className="h-6 w-6 shrink-0 object-contain"
+                />
                 <span className="text-[13px] font-semibold text-sidebar-foreground tracking-tight">
                   Verso
                 </span>

@@ -21,6 +21,9 @@ const firaCode = Fira_Code({
 export const metadata: Metadata = {
   title: "Verso",
   description: "Your workspace, your way.",
+  icons: {
+    icon: "/images/logo-mark.svg",
+  },
 };
 
 export default function RootLayout({

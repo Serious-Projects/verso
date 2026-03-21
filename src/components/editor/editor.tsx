@@ -156,7 +156,9 @@ export function Editor({ pageId }: EditorProps) {
   const saveTimeout = useRef<ReturnType<typeof setTimeout> | null>(null);
   const hideTimeout = useRef<ReturnType<typeof setTimeout> | null>(null);
   const titleRef = useRef<HTMLHeadingElement>(null);
-  const contentLoadedRef = useRef(false);
+  const loadedForPageRef = useRef<string | null>(null); // tracks which pageId content was loaded for
+  const pageIdRef = useRef(pageId); // always current pageId for onUpdate closure
+  useEffect(() => { pageIdRef.current = pageId; }, [pageId]);
 
   // Editor
   const editor = useEditor({
@@ -220,7 +222,7 @@ export function Editor({ pageId }: EditorProps) {
       setSaveStatus("saving");
       saveTimeout.current = setTimeout(() => {
         try {
-          updatePage(pageId, { content });
+          updatePage(pageIdRef.current, { content }); // always uses current pageId
           setSaveStatus("saved");
           hideTimeout.current = setTimeout(() => setSaveStatus("idle"), 2000);
         } catch {
@@ -237,14 +239,14 @@ export function Editor({ pageId }: EditorProps) {
   const [iconSearch, setIconSearch] = useState("");
   const [activeCategory, setActiveCategory] = useState(0);
 
-  // Load content once hydration is complete
+  // Load content once hydration is complete, and whenever pageId changes
   useEffect(() => {
-    if (!editor || !hasHydrated || contentLoadedRef.current) return;
-    contentLoadedRef.current = true;
+    if (!editor || !hasHydrated) return;
+    if (loadedForPageRef.current === pageId) return; // already loaded for this page
+    loadedForPageRef.current = pageId;
     const stored = usePageStore.getState().pages[pageId];
-    if (stored?.content && Object.keys(stored.content).length > 0) {
-      editor.commands.setContent(stored.content);
-    }
+    const content = stored?.content && Object.keys(stored.content).length > 0 ? stored.content : "";
+    editor.commands.setContent(content, false); // false = don't fire onUpdate
   }, [editor, pageId, hasHydrated]);
 
   // Load title once hydration is complete

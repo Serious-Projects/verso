@@ -1,0 +1,6 @@
+<svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg" fill="none">
+  <!-- Dark left stroke -->
+  <polygon points="12,14 44,14 51,86" fill="#2c2c2c"/>
+  <!-- Amber right stroke -->
+  <polygon points="54,14 80,14 51,86" fill="#F5A623"/>
+</svg>
