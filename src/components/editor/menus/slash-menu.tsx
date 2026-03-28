@@ -2,17 +2,22 @@
 
 import { Editor } from "@tiptap/react";
 import {
+  BookmarkIcon,
   CheckSquare,
   ChevronRight,
   Code,
+  FileIcon,
   Heading1,
   Heading2,
   Heading3,
+  ImageIcon,
   Lightbulb,
   List,
   ListOrdered,
   Minus,
+  PlayCircle,
   Quote,
+  Table,
   Type,
 } from "lucide-react";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
@@ -111,6 +116,42 @@ const SLASH_ITEMS: SlashMenuItem[] = [
     icon: <Minus className="h-4 w-4" />,
     aliases: ["divider", "hr", "separator", "line", "---"],
     command: (editor) => editor.chain().focus().setHorizontalRule().run(),
+  },
+  {
+    title: "Image",
+    description: "Embed an image from a URL",
+    icon: <ImageIcon className="h-4 w-4" />,
+    aliases: ["image", "img", "photo", "picture"],
+    command: (editor) => editor.chain().focus().setImageBlock().run(),
+  },
+  {
+    title: "Video",
+    description: "Embed a YouTube or Vimeo video",
+    icon: <PlayCircle className="h-4 w-4" />,
+    aliases: ["video", "youtube", "vimeo", "embed", "media"],
+    command: (editor) => editor.chain().focus().setVideoBlock().run(),
+  },
+  {
+    title: "File",
+    description: "Attach a file from a URL",
+    icon: <FileIcon className="h-4 w-4" />,
+    aliases: ["file", "attachment", "download", "upload"],
+    command: (editor) => editor.chain().focus().setFileBlock().run(),
+  },
+  {
+    title: "Bookmark",
+    description: "Save a web link as a card",
+    icon: <BookmarkIcon className="h-4 w-4" />,
+    aliases: ["bookmark", "link", "url", "web"],
+    command: (editor) => editor.chain().focus().setBookmarkBlock().run(),
+  },
+  {
+    title: "Table",
+    description: "Insert a table with rows and columns",
+    icon: <Table className="h-4 w-4" />,
+    aliases: ["table", "grid", "spreadsheet", "rows", "columns"],
+    command: (editor) =>
+      editor.chain().focus().insertTable({ rows: 3, cols: 3, withHeaderRow: true }).run(),
   },
 ];
 

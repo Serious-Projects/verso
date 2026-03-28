@@ -134,6 +134,15 @@ export const SlashCommand = Extension.create<object, SlashCommandStorage>({
             if (text === "/" && !storage.active) {
               const { state } = view;
               const $from = state.doc.resolve(from);
+
+              // Don't activate inside table cells — walk resolved-pos ancestors
+              for (let d = $from.depth; d >= 0; d--) {
+                const n = $from.node(d).type.name;
+                if (n === "tableCell" || n === "tableHeader" || n === "table") {
+                  return false;
+                }
+              }
+
               const textBefore = $from.parent.textContent.slice(0, $from.parentOffset);
 
               if (textBefore.length === 0 || textBefore.endsWith(" ")) {

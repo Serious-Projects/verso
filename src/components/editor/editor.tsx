@@ -4,8 +4,13 @@ import CodeBlockLowlight from "@tiptap/extension-code-block-lowlight";
 import Color from "@tiptap/extension-color";
 import Highlight from "@tiptap/extension-highlight";
 import Placeholder from "@tiptap/extension-placeholder";
+import { Table } from "@tiptap/extension-table";
+import { TableCell } from "@tiptap/extension-table-cell";
+import { TableHeader } from "@tiptap/extension-table-header";
+import { TableRow } from "@tiptap/extension-table-row";
 import TaskItem from "@tiptap/extension-task-item";
 import TaskList from "@tiptap/extension-task-list";
+import TextAlign from "@tiptap/extension-text-align";
 import { TextStyle } from "@tiptap/extension-text-style";
 import Underline from "@tiptap/extension-underline";
 import { EditorContent, useEditor } from "@tiptap/react";
@@ -16,16 +21,22 @@ import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { usePageStore } from "@/stores/page-store";
 import type { FontStyle } from "@/types/page";
 import { Breadcrumbs } from "./breadcrumbs";
+import { BookmarkBlock } from "./extensions/bookmark-block";
 import { Callout } from "./extensions/callout";
+import { FileBlock } from "./extensions/file-block";
+import { ImageBlock } from "./extensions/image-block";
 import { KeyboardShortcuts } from "./extensions/keyboard-shortcuts";
 import { MarkdownPaste } from "./extensions/markdown-paste";
 import { MarkdownShortcuts } from "./extensions/markdown-shortcuts";
 import { SlashCommand } from "./extensions/slash-command";
+import { TableKeymap } from "./extensions/table-keymap";
 import { ToggleBlock } from "./extensions/toggle";
 import { TrimSelection } from "./extensions/trim-selection";
+import { VideoBlock } from "./extensions/video-block";
 import { BlockHandle } from "./menus/block-handle";
 import { BubbleMenuBar } from "./menus/bubble-menu";
 import { SlashMenu } from "./menus/slash-menu";
+import { TableMenu } from "./menus/table-menu";
 
 const lowlight = createLowlight(common);
 
@@ -175,9 +186,12 @@ export function Editor({ pageId }: EditorProps) {
         },
       }),
       Placeholder.configure({
-        placeholder: ({ node }) => {
+        placeholder: ({ node, editor }) => {
           if (node.type.name === "heading") {
             return `Heading ${node.attrs.level}`;
+          }
+          if (editor.isActive("tableCell") || editor.isActive("tableHeader")) {
+            return "";
           }
           return "Type '/' for commands...";
         },
@@ -207,6 +221,16 @@ export function Editor({ pageId }: EditorProps) {
       }),
       Callout,
       ToggleBlock,
+      ImageBlock,
+      VideoBlock,
+      FileBlock,
+      BookmarkBlock,
+      Table.configure({ resizable: false }),
+      TableRow,
+      TableHeader,
+      TableCell,
+      TableKeymap,
+      TextAlign.configure({ types: ["heading", "paragraph"] }),
       SlashCommand,
       KeyboardShortcuts,
       MarkdownShortcuts,
@@ -527,7 +551,9 @@ export function Editor({ pageId }: EditorProps) {
                               onClick={() => selectIcon(ic.emoji)}
                               data-testid="icon-button"
                               className={`flex h-9 w-9 items-center justify-center rounded-xl text-xl transition-all duration-100 hover:bg-primary/10 hover:scale-110 ${
-                                page?.icon === ic.emoji ? "bg-primary/15 ring-1 ring-primary/30" : ""
+                                page?.icon === ic.emoji
+                                  ? "bg-primary/15 ring-1 ring-primary/30"
+                                  : ""
                               }`}
                             >
                               {ic.emoji}
@@ -602,6 +628,7 @@ export function Editor({ pageId }: EditorProps) {
       <EditorContent editor={editor} className={fontClass} />
       <BubbleMenuBar editor={editor} />
       <SlashMenu editor={editor} />
+      <TableMenu editor={editor} />
       <BlockHandle editor={editor} />
     </div>
   );

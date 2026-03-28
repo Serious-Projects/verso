@@ -110,9 +110,7 @@ test.describe("Page title", () => {
     await freshWorkspace(page);
     const title = page.getByTestId("page-title");
 
-    await title.click();
-    await page.keyboard.press("Control+a");
-    await page.keyboard.type("My Test Page");
+    await title.fill("My Test Page");
 
     // Title should persist — reload and verify
     await page.reload();
@@ -138,9 +136,7 @@ test.describe("Page title", () => {
     const pageId = await getPageIdFromUrl(page);
     const title = page.getByTestId("page-title");
 
-    await title.click();
-    await page.keyboard.press("Control+a");
-    await page.keyboard.type("Sidebar Sync Test");
+    await title.fill("Sidebar Sync Test");
     await page.waitForTimeout(300);
 
     const sidebarItem = page.getByTestId(`page-item-${pageId}`);
@@ -279,9 +275,7 @@ test.describe("Breadcrumbs", () => {
 
     // Set a parent title so breadcrumb shows something
     const titleEl = page.getByTestId("page-title");
-    await titleEl.click();
-    await page.keyboard.press("Control+a");
-    await page.keyboard.type("Parent Page");
+    await titleEl.fill("Parent Page");
     await page.waitForTimeout(300);
 
     // Create sub-page

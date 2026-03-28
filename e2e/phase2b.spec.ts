@@ -225,9 +225,7 @@ test.describe("Search", () => {
   test("typing filters pages by title", async ({ page }) => {
     await freshWorkspace(page);
     const titleEl = page.getByTestId("page-title");
-    await titleEl.click();
-    await page.keyboard.press("Control+a");
-    await page.keyboard.type("Unique Alpha Page");
+    await titleEl.fill("Unique Alpha Page");
     await page.waitForTimeout(300);
 
     const urlBefore = page.url();

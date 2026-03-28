@@ -734,7 +734,7 @@ test.describe("Block handle", () => {
     expect(pCount).toBeGreaterThanOrEqual(2);
   });
 
-  test("drag handle is draggable", async ({ page }) => {
+  test("drag handle has grab cursor", async ({ page }) => {
     await (await getEditor(page)).click();
     await page.keyboard.type("Draggable block");
     await page.waitForTimeout(100);
@@ -748,8 +748,64 @@ test.describe("Block handle", () => {
 
     const gripBtn = page.locator(".fixed.z-40 button").nth(1);
     await expect(gripBtn).toBeVisible();
-    // Verify it has draggable attribute
-    await expect(gripBtn).toHaveAttribute("draggable", "true");
+    // Verify it has the grab cursor class
+    await expect(gripBtn).toHaveClass(/cursor-grab/);
+  });
+
+  test("drag reorders blocks", async ({ page }) => {
+    const editor = await getEditor(page);
+    await editor.click();
+    await page.keyboard.type("Block One");
+    await page.keyboard.press("Enter");
+    await page.keyboard.type("Block Two");
+    await page.waitForTimeout(200);
+
+    // Verify initial order
+    let html = await editor.innerHTML();
+    expect(html.indexOf("Block One")).toBeLessThan(html.indexOf("Block Two"));
+
+    // Hover over the first paragraph to reveal the block handle
+    const firstPara = page.locator(".verso-editor p").first();
+    const firstParaBox = await firstPara.boundingBox();
+    if (!firstParaBox) throw new Error("First para not found");
+
+    await page.mouse.move(
+      firstParaBox.x + firstParaBox.width / 2,
+      firstParaBox.y + firstParaBox.height / 2,
+    );
+    await page.waitForTimeout(500);
+
+    const grip = page.locator(".fixed.z-40 button").nth(1);
+    await expect(grip).toBeVisible({ timeout: 5000 });
+
+    const secondPara = page.locator(".verso-editor p").nth(1);
+    const secondParaBox = await secondPara.boundingBox();
+    if (!secondParaBox) throw new Error("Second para not found");
+
+    const gripBox = await grip.boundingBox();
+    if (!gripBox) throw new Error("Grip not found");
+
+    // Mouse-based drag: mousedown on grip → move below second block → mouseup
+    await page.mouse.move(
+      gripBox.x + gripBox.width / 2,
+      gripBox.y + gripBox.height / 2,
+    );
+    await page.mouse.down();
+    await page.waitForTimeout(50);
+
+    // Move past the second block in steps for smooth indicator tracking
+    await page.mouse.move(
+      secondParaBox.x + secondParaBox.width / 2,
+      secondParaBox.y + secondParaBox.height + 5,
+      { steps: 5 },
+    );
+    await page.waitForTimeout(100);
+    await page.mouse.up();
+    await page.waitForTimeout(300);
+
+    // Verify order is reversed
+    html = await editor.innerHTML();
+    expect(html.indexOf("Block Two")).toBeLessThan(html.indexOf("Block One"));
   });
 
   test("handle hides when mouse leaves editor", async ({ page }) => {
