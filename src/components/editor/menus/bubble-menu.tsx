@@ -1,5 +1,6 @@
 "use client";
 
+import { NodeSelection } from "@tiptap/pm/state";
 import { Editor } from "@tiptap/react";
 import {
   Bold,
@@ -206,6 +207,12 @@ export function BubbleMenuBar({ editor }: { editor: Editor }) {
     const { empty, from, to } = selection;
 
     if (empty || from === to) {
+      setVisible(false);
+      return;
+    }
+
+    // Hide for node selections on atom blocks (database, image, video, etc.)
+    if (selection instanceof NodeSelection) {
       setVisible(false);
       return;
     }

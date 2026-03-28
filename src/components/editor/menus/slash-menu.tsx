@@ -6,6 +6,7 @@ import {
   CheckSquare,
   ChevronRight,
   Code,
+  Database,
   FileIcon,
   Heading1,
   Heading2,
@@ -152,6 +153,13 @@ const SLASH_ITEMS: SlashMenuItem[] = [
     aliases: ["table", "grid", "spreadsheet", "rows", "columns"],
     command: (editor) =>
       editor.chain().focus().insertTable({ rows: 3, cols: 3, withHeaderRow: true }).run(),
+  },
+  {
+    title: "Database",
+    description: "Inline database with properties",
+    icon: <Database className="h-4 w-4" />,
+    aliases: ["database", "db", "spreadsheet", "tracker", "collection"],
+    command: (editor) => editor.chain().focus().setDatabaseBlock().run(),
   },
 ];
 

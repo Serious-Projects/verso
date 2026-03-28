@@ -23,6 +23,7 @@ import type { FontStyle } from "@/types/page";
 import { Breadcrumbs } from "./breadcrumbs";
 import { BookmarkBlock } from "./extensions/bookmark-block";
 import { Callout } from "./extensions/callout";
+import { DatabaseBlock } from "./extensions/database-block";
 import { FileBlock } from "./extensions/file-block";
 import { ImageBlock } from "./extensions/image-block";
 import { KeyboardShortcuts } from "./extensions/keyboard-shortcuts";
@@ -225,6 +226,7 @@ export function Editor({ pageId }: EditorProps) {
       VideoBlock,
       FileBlock,
       BookmarkBlock,
+      DatabaseBlock,
       Table.configure({ resizable: false }),
       TableRow,
       TableHeader,
