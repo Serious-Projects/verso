@@ -1,7 +1,26 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { useEffect } from "react";
 import { createPortal } from "react-dom";
+
+import { useDropdownPosition } from "@/hooks/use-dropdown-position";
+
+const TW_WIDTH_TO_PX: Record<string, number> = {
+  "w-28": 112,
+  "w-32": 128,
+  "w-36": 144,
+  "w-40": 160,
+  "w-44": 176,
+  "w-52": 208,
+  "w-56": 224,
+  "w-64": 256,
+  "w-72": 288,
+  "w-80": 320,
+};
+
+function resolveWidth(tw: string): number {
+  return TW_WIDTH_TO_PX[tw] ?? parseInt(tw.replace("w-", "")) * 4;
+}
 
 interface DropdownProps {
   trigger: React.ReactNode;
@@ -24,20 +43,16 @@ export function Dropdown({
   testId,
   className,
 }: DropdownProps) {
-  const triggerRef = useRef<HTMLDivElement>(null);
-  const [pos, setPos] = useState({ top: 0, left: 0 });
+  const widthPx = resolveWidth(width);
+  const { triggerRef, pos, recompute } = useDropdownPosition<HTMLDivElement>({
+    align,
+    widthPx,
+  });
 
   useEffect(() => {
-    if (!open || !triggerRef.current) return;
-    const rect = triggerRef.current.getBoundingClientRect();
-    const widthPx = parseInt(width.replace("w-", "")) * 4;
-    setPos({
-      top: rect.bottom + 4,
-      left: align === "right" ? rect.right - widthPx : rect.left,
-    });
-  }, [open, align, width]);
+    if (open) recompute();
+  }, [open, recompute]);
 
-  // Close on Escape
   useEffect(() => {
     if (!open) return;
     const handler = (e: KeyboardEvent) => {
@@ -53,13 +68,17 @@ export function Dropdown({
       {open &&
         createPortal(
           <>
-            <div className="fixed inset-0 z-40" onClick={() => onOpenChange(false)} />
+            <div className="fixed inset-0 z-60" onClick={() => onOpenChange(false)} />
             <div
-              className={`fixed z-50 ${width} rounded-lg border border-border/50 bg-popover/95 shadow-xl backdrop-blur-xl`}
+              className={`fixed z-70 ${width} rounded-lg border border-border/50 bg-popover/95 shadow-xl backdrop-blur-xl`}
               style={{ top: pos.top, left: pos.left }}
               onClick={(e) => e.stopPropagation()}
               data-testid={testId}
             >
+              <div
+                className="absolute -top-1.25 h-2.5 w-2.5 rotate-45 border-l border-t border-border/50 bg-popover/95"
+                style={{ left: pos.arrowLeft - 5 }}
+              />
               {children}
             </div>
           </>,
@@ -69,7 +88,6 @@ export function Dropdown({
   );
 }
 
-/** Sub-menu that positions itself to the right of its trigger */
 interface SubMenuProps {
   trigger: React.ReactNode;
   open: boolean;
@@ -87,14 +105,15 @@ export function SubMenu({
   children,
   testId,
 }: SubMenuProps) {
-  const triggerRef = useRef<HTMLDivElement>(null);
-  const [pos, setPos] = useState({ top: 0, left: 0 });
+  const widthPx = resolveWidth(width);
+  const { triggerRef, pos, recompute } = useDropdownPosition<HTMLDivElement>({
+    widthPx,
+    placement: "right",
+  });
 
   useEffect(() => {
-    if (!open || !triggerRef.current) return;
-    const rect = triggerRef.current.getBoundingClientRect();
-    setPos({ top: rect.top, left: rect.right + 4 });
-  }, [open]);
+    if (open) recompute();
+  }, [open, recompute]);
 
   return (
     <div ref={triggerRef}>
@@ -102,7 +121,7 @@ export function SubMenu({
       {open &&
         createPortal(
           <div
-            className={`fixed z-60 ${width} rounded-lg border border-border/50 bg-popover/95 p-1 shadow-xl backdrop-blur-xl`}
+            className={`fixed z-80 ${width} rounded-lg border border-border/50 bg-popover/95 p-1 shadow-xl backdrop-blur-xl`}
             style={{ top: pos.top, left: pos.left }}
             onClick={(e) => e.stopPropagation()}
             data-testid={testId}

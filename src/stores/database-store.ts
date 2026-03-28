@@ -117,6 +117,8 @@ interface DatabaseState {
   deleteRow: (dbId: string, rowId: string) => void;
 
   // Views
+  addView: (dbId: string, type: DatabaseView["type"], name: string) => string | undefined;
+  setActiveView: (dbId: string, viewId: string) => void;
   updateView: (dbId: string, viewId: string, updates: Partial<Omit<DatabaseView, "id">>) => void;
   addFilter: (dbId: string, viewId: string, filter: Omit<FilterRule, "id">) => void;
   removeFilter: (dbId: string, viewId: string, filterId: string) => void;
@@ -143,6 +145,7 @@ export const useDatabaseStore = create<DatabaseState>()(
           properties,
           rows,
           views: [view],
+          activeViewId: view.id,
           createdAt: now,
           updatedAt: now,
         };
@@ -417,6 +420,43 @@ export const useDatabaseStore = create<DatabaseState>()(
       },
 
       // --- Views ---
+
+      addView: (dbId, type, name) => {
+        const viewId = generateId();
+        set((state) => {
+          const db = state.databases[dbId];
+          if (!db) return state;
+          const newView: DatabaseView = {
+            id: viewId,
+            name,
+            type,
+            visiblePropertyIds: db.properties.map((p) => p.id),
+            propertyWidths: Object.fromEntries(db.properties.map((p) => [p.id, p.width ?? 200])),
+            filters: [],
+            sorts: [],
+          };
+          return {
+            databases: {
+              ...state.databases,
+              [dbId]: { ...db, views: [...db.views, newView], activeViewId: viewId, updatedAt: Date.now() },
+            },
+          };
+        });
+        return viewId;
+      },
+
+      setActiveView: (dbId, viewId) => {
+        set((state) => {
+          const db = state.databases[dbId];
+          if (!db || !db.views.some((v) => v.id === viewId)) return state;
+          return {
+            databases: {
+              ...state.databases,
+              [dbId]: { ...db, activeViewId: viewId, updatedAt: Date.now() },
+            },
+          };
+        });
+      },
 
       updateView: (dbId, viewId, updates) => {
         set((state) => {

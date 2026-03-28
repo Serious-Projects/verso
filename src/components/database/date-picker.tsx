@@ -21,7 +21,7 @@ function getFirstDayOfMonth(year: number, month: number) {
 
 function formatDate(date: string): string {
   const d = new Date(date + "T00:00:00");
-  return d.toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" });
+  return d.toLocaleDateString("en-IN", { month: "short", day: "numeric", year: "numeric" });
 }
 
 function toISODate(year: number, month: number, day: number): string {

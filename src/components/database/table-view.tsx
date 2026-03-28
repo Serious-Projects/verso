@@ -29,7 +29,7 @@ export function TableView({ database }: TableViewProps) {
   const deleteRow = useDatabaseStore((s) => s.deleteRow);
   const resizeProperty = useDatabaseStore((s) => s.resizeProperty);
 
-  const view = database.views[0];
+  const view = database.views.find((v) => v.id === database.activeViewId) ?? database.views[0];
   const tableRef = useRef<HTMLTableElement>(null);
 
   // Process data through filter → sort → group pipeline
@@ -229,7 +229,6 @@ export function TableView({ database }: TableViewProps) {
   );
 }
 
-// ─── Group section with collapsible rows ────────────────────────────────────
 
 function GroupSection({
   group,

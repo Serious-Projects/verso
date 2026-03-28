@@ -22,7 +22,6 @@ import { Dropdown } from "./dropdown";
 import { PropertyIcon, PROPERTY_TYPE_LABELS } from "./property-icon";
 import { SelectInput } from "./select-input";
 
-// ─── Operator config per property type ──────────────────────────────────────
 
 type OpConfig = { value: FilterOperator; label: string };
 
@@ -76,7 +75,6 @@ function needsValueInput(op: FilterOperator): boolean {
   return op !== "is_empty" && op !== "is_not_empty";
 }
 
-// ─── Toolbar ────────────────────────────────────────────────────────────────
 
 interface FilterSortBarProps {
   dbId: string;
@@ -89,6 +87,10 @@ export function FilterSortBar({ dbId, view, properties }: FilterSortBarProps) {
   const [sortOpen, setSortOpen] = useState(false);
   const [groupOpen, setGroupOpen] = useState(false);
 
+  const openFilter = useCallback((v: boolean) => { setFilterOpen(v); if (v) { setSortOpen(false); setGroupOpen(false); } }, []);
+  const openSort = useCallback((v: boolean) => { setSortOpen(v); if (v) { setFilterOpen(false); setGroupOpen(false); } }, []);
+  const openGroup = useCallback((v: boolean) => { setGroupOpen(v); if (v) { setFilterOpen(false); setSortOpen(false); } }, []);
+
   const hasFilters = view.filters.length > 0;
   const hasSorts = view.sorts.length > 0;
   const hasGroup = !!view.groupBy;
@@ -97,14 +99,14 @@ export function FilterSortBar({ dbId, view, properties }: FilterSortBarProps) {
     <div className="flex items-center gap-1 border-b border-border/20 px-4 py-1.5">
       <Dropdown
         open={filterOpen}
-        onOpenChange={setFilterOpen}
+        onOpenChange={openFilter}
         width="w-80"
         testId="filter-panel"
         className="relative"
         trigger={
           <button
             type="button"
-            onClick={() => setFilterOpen((v) => !v)}
+            onClick={() => openFilter(!filterOpen)}
             data-testid="filter-btn"
             className={`flex items-center gap-1.5 rounded-md px-2 py-1 text-xs transition-colors ${
               hasFilters
@@ -122,14 +124,14 @@ export function FilterSortBar({ dbId, view, properties }: FilterSortBarProps) {
 
       <Dropdown
         open={sortOpen}
-        onOpenChange={setSortOpen}
+        onOpenChange={openSort}
         width="w-72"
         testId="sort-panel"
         className="relative"
         trigger={
           <button
             type="button"
-            onClick={() => setSortOpen((v) => !v)}
+            onClick={() => openSort(!sortOpen)}
             data-testid="sort-btn"
             className={`flex items-center gap-1.5 rounded-md px-2 py-1 text-xs transition-colors ${
               hasSorts
@@ -147,14 +149,14 @@ export function FilterSortBar({ dbId, view, properties }: FilterSortBarProps) {
 
       <Dropdown
         open={groupOpen}
-        onOpenChange={setGroupOpen}
+        onOpenChange={openGroup}
         width="w-56"
         testId="group-panel"
         className="relative"
         trigger={
           <button
             type="button"
-            onClick={() => setGroupOpen((v) => !v)}
+            onClick={() => openGroup(!groupOpen)}
             data-testid="group-btn"
             className={`flex items-center gap-1.5 rounded-md px-2 py-1 text-xs transition-colors ${
               hasGroup
@@ -173,7 +175,6 @@ export function FilterSortBar({ dbId, view, properties }: FilterSortBarProps) {
   );
 }
 
-// ─── Filter Panel ───────────────────────────────────────────────────────────
 
 function FilterPanel({
   dbId,
@@ -301,7 +302,6 @@ function FilterPanel({
   );
 }
 
-// ─── Filter Value Input ─────────────────────────────────────────────────────
 
 function FilterValueInput({
   prop,
@@ -357,7 +357,6 @@ function FilterValueInput({
   );
 }
 
-// ─── Sort Panel ─────────────────────────────────────────────────────────────
 
 function SortPanel({
   dbId,
@@ -454,7 +453,6 @@ function SortPanel({
   );
 }
 
-// ─── Group Panel ────────────────────────────────────────────────────────────
 
 function GroupPanel({
   dbId,

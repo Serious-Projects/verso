@@ -8,7 +8,6 @@ import type {
   SortRule,
 } from "@/types/database";
 
-// ─── Filter ─────────────────────────────────────────────────────────────────
 
 function matchesFilter(
   cellValue: CellValue,
@@ -109,7 +108,6 @@ export function applyFilters(
   );
 }
 
-// ─── Sort ───────────────────────────────────────────────────────────────────
 
 function compareCells(
   a: CellValue,
@@ -170,7 +168,6 @@ export function applySorts(
   });
 }
 
-// ─── Group ──────────────────────────────────────────────────────────────────
 
 export interface RowGroup {
   key: string;
@@ -223,7 +220,6 @@ export function applyGrouping(
   return groups;
 }
 
-// ─── Combined pipeline ─────────────────────────────────────────────────────
 
 export function processRows(
   rows: DatabaseRow[],

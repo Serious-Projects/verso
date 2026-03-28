@@ -93,6 +93,7 @@ export interface Database {
   properties: DatabaseProperty[];
   rows: DatabaseRow[];
   views: DatabaseView[];
+  activeViewId: string;
   createdAt: number;
   updatedAt: number;
 }
