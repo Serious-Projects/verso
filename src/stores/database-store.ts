@@ -422,6 +422,8 @@ export const useDatabaseStore = create<DatabaseState>()(
       // --- Views ---
 
       addView: (dbId, type, name) => {
+        const db = get().databases[dbId];
+        if (!db) return undefined;
         const viewId = generateId();
         set((state) => {
           const db = state.databases[dbId];
@@ -431,7 +433,7 @@ export const useDatabaseStore = create<DatabaseState>()(
             name,
             type,
             visiblePropertyIds: db.properties.map((p) => p.id),
-            propertyWidths: Object.fromEntries(db.properties.map((p) => [p.id, p.width ?? 200])),
+            propertyWidths: Object.fromEntries(db.properties.map((p) => [p.id, p.width ?? DEFAULT_PROPERTY_WIDTH])),
             filters: [],
             sorts: [],
           };

@@ -153,8 +153,9 @@ test.describe("Board add card", () => {
     // Click + New in the first column
     await addButtons.first().click();
     await page.waitForTimeout(300);
-    // Should now have 4 cards total (3 default + 1 new)
-    await expect(page.locator('[data-testid="board-card"]')).toHaveCount(4);
+    // Default 3 rows (in "No status") + 1 new card in first column
+    const cardsBefore = 3;
+    await expect(page.locator('[data-testid="board-card"]')).toHaveCount(cardsBefore + 1);
   });
 
   test("new card in a column gets the correct status value", async ({ page }) => {
@@ -191,7 +192,9 @@ test.describe("Board drag and drop", () => {
     // Get positions
     const cardBox = await firstCard.boundingBox();
     const colBox = await targetColumn.boundingBox();
-    if (!cardBox || !colBox) return;
+    expect.soft(cardBox, "firstCard boundingBox should not be null").not.toBeNull();
+    expect.soft(colBox, "targetColumn boundingBox should not be null").not.toBeNull();
+    if (!cardBox || !colBox) throw new Error("BoundingBox is null — element not visible");
 
     // Drag card to target column
     await page.mouse.move(cardBox.x + cardBox.width / 2, cardBox.y + cardBox.height / 2);

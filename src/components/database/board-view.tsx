@@ -5,6 +5,8 @@ import {
   DragOverlay,
   PointerSensor,
   closestCenter,
+  useDraggable,
+  useDroppable,
   useSensor,
   useSensors,
   type DragEndEvent,
@@ -29,6 +31,7 @@ export function BoardView({ database }: BoardViewProps) {
   const addRow = useDatabaseStore((s) => s.addRow);
 
   const view = database.views.find((v) => v.id === database.activeViewId) ?? database.views[0];
+  if (!view) return null;
 
   // Find the grouping property — prefer view.groupBy, fallback to first select/status column
   const groupProperty = useMemo(() => {
@@ -232,8 +235,6 @@ export function BoardView({ database }: BoardViewProps) {
   );
 }
 
-import { useDroppable } from "@dnd-kit/core";
-import { useDraggable } from "@dnd-kit/core";
 
 function BoardColumn({
   id,
@@ -278,7 +279,7 @@ function BoardColumn({
       </div>
 
       {/* Cards */}
-      <div className="flex flex-col gap-2 px-1.5 pb-2 min-h-15">
+      <div className="flex flex-col gap-2 px-1.5 pb-2 min-h-16">
         {rows.map((row) => (
           <BoardCard
             key={row.id}
@@ -490,6 +491,6 @@ function CardPropertyValue({
 
   // Text, number, url, email, phone
   return (
-    <span className="text-[10px] text-muted-foreground/60 truncate max-w-30">{String(value)}</span>
+    <span className="text-[10px] text-muted-foreground/60 truncate max-w-32">{String(value)}</span>
   );
 }

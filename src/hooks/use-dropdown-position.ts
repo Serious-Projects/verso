@@ -62,15 +62,15 @@ export function useDropdownPosition<T extends HTMLElement = HTMLDivElement>({
       }
     }
 
+    // Center dropdown under trigger (only when align is "left", i.e. not explicitly right-aligned)
+    if (placement === "below" && align === "left") {
+      const centered = rect.left + rect.width / 2 - widthPx / 2;
+      left = centered;
+    }
+
     // Clamp to viewport
     left = Math.max(VIEWPORT_PADDING, Math.min(left, vw - widthPx - VIEWPORT_PADDING));
-    top = Math.max(VIEWPORT_PADDING, Math.min(top, vh - VIEWPORT_PADDING));
-
-    // Center dropdown horizontally under trigger, then clamp
-    if (placement === "below") {
-      const centered = rect.left + rect.width / 2 - widthPx / 2;
-      left = Math.max(VIEWPORT_PADDING, Math.min(centered, vw - widthPx - VIEWPORT_PADDING));
-    }
+    top = Math.max(VIEWPORT_PADDING, Math.min(top, vh - ESTIMATED_DROPDOWN_HEIGHT - VIEWPORT_PADDING));
 
     // Arrow points at trigger center, relative to dropdown left
     const triggerCenter = rect.left + rect.width / 2;

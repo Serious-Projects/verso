@@ -19,7 +19,9 @@ const TW_WIDTH_TO_PX: Record<string, number> = {
 };
 
 function resolveWidth(tw: string): number {
-  return TW_WIDTH_TO_PX[tw] ?? parseInt(tw.replace("w-", "")) * 4;
+  if (TW_WIDTH_TO_PX[tw]) return TW_WIDTH_TO_PX[tw];
+  const match = tw.match(/^w-(\d+)$/);
+  return match ? parseInt(match[1]) * 4 : 224; // fallback to w-56
 }
 
 interface DropdownProps {
