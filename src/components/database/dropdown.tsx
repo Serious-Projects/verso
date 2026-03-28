@@ -92,7 +92,7 @@ export function SubMenu({
       {open &&
         createPortal(
           <div
-            className={`fixed z-[60] ${width} rounded-lg border border-border/50 bg-popover/95 p-1 shadow-xl backdrop-blur-xl`}
+            className={`fixed z-60 ${width} rounded-lg border border-border/50 bg-popover/95 p-1 shadow-xl backdrop-blur-xl`}
             style={{ top: pos.top, left: pos.left }}
             onClick={(e) => e.stopPropagation()}
             data-testid={testId}

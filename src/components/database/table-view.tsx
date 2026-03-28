@@ -6,13 +6,16 @@ import {
   getCoreRowModel,
   useReactTable,
 } from "@tanstack/react-table";
-import { Plus, Trash2 } from "lucide-react";
-import { useCallback, useMemo, useRef } from "react";
+import { ChevronRight, Plus, Trash2 } from "lucide-react";
+import { useCallback, useMemo, useRef, useState } from "react";
 
 import { useDatabaseStore } from "@/stores/database-store";
 import type { Database, DatabaseRow } from "@/types/database";
+import { SELECT_COLORS } from "@/types/database";
 import { CellRenderer } from "./cell-renderer";
 import { AddColumnButton, ColumnHeader } from "./column-header";
+import { processRows, type RowGroup } from "./data-processing";
+import { FilterSortBar } from "./filter-sort-bar";
 
 const columnHelper = createColumnHelper<DatabaseRow>();
 const MIN_COL_WIDTH = 80;
@@ -27,8 +30,13 @@ export function TableView({ database }: TableViewProps) {
   const resizeProperty = useDatabaseStore((s) => s.resizeProperty);
 
   const view = database.views[0];
-
   const tableRef = useRef<HTMLTableElement>(null);
+
+  // Process data through filter → sort → group pipeline
+  const { rows: processedRows, groups } = useMemo(
+    () => processRows(database.rows, view, database.properties),
+    [database.rows, database.properties, view],
+  );
 
   const columns = useMemo(() => {
     const visibleProps = view
@@ -77,19 +85,20 @@ export function TableView({ database }: TableViewProps) {
     ];
   }, [database, view, deleteRow]);
 
+  // Use processed (ungrouped) rows for the flat table
+  const tableData = groups ? [] as DatabaseRow[] : processedRows;
+
   const table = useReactTable({
-    data: database.rows,
+    data: tableData,
     columns,
     getCoreRowModel: getCoreRowModel(),
   });
 
-  // Resize via direct DOM manipulation — zero React re-renders during drag
   const handleResizeStart = useCallback(
     (propertyId: string, colIndex: number, startX: number, startWidth: number) => {
       const tableEl = tableRef.current;
       if (!tableEl) return;
 
-      // Collect all cells in this column (th + td) for direct width mutation
       const cells: HTMLElement[] = [];
       const rows = tableEl.querySelectorAll("tr");
       rows.forEach((row) => {
@@ -97,7 +106,6 @@ export function TableView({ database }: TableViewProps) {
         if (cell) cells.push(cell);
       });
 
-      // Disable text selection during drag
       document.body.style.userSelect = "none";
       document.body.style.cursor = "col-resize";
 
@@ -106,7 +114,6 @@ export function TableView({ database }: TableViewProps) {
       const onMouseMove = (e: MouseEvent) => {
         const delta = e.clientX - startX;
         finalWidth = Math.max(startWidth + delta, MIN_COL_WIDTH);
-        // Direct DOM mutation — no React re-render
         const px = `${finalWidth}px`;
         for (let i = 0; i < cells.length; i++) {
           cells[i].style.width = px;
@@ -118,7 +125,6 @@ export function TableView({ database }: TableViewProps) {
         document.removeEventListener("mouseup", onMouseUp);
         document.body.style.userSelect = "";
         document.body.style.cursor = "";
-        // Single store update on drop — persists to both property.width and view.propertyWidths
         resizeProperty(database.id, propertyId, finalWidth);
       };
 
@@ -128,67 +134,90 @@ export function TableView({ database }: TableViewProps) {
     [database.id, resizeProperty],
   );
 
+  const colCount = columns.length;
+
   return (
-    <div className="w-full overflow-x-auto" data-testid="database-table">
-      <table ref={tableRef} className="w-full border-collapse" style={{ tableLayout: "fixed" }}>
-        <thead>
-          {table.getHeaderGroups().map((headerGroup) => (
-            <tr key={headerGroup.id} className="border-b border-border/30">
-              {headerGroup.headers.map((header, colIndex) => {
-                const isResizable = header.id !== "_actions" && header.id !== "_add_column";
-                return (
-                  <th
-                    key={header.id}
-                    style={{
-                      width: header.getSize(),
-                      minWidth: header.id === "_actions" ? 32 : MIN_COL_WIDTH,
-                    }}
-                    className="relative h-8 border-r border-border/20 text-left font-normal last:border-r-0"
-                  >
-                    {header.isPlaceholder
-                      ? null
-                      : flexRender(header.column.columnDef.header, header.getContext())}
-                    {isResizable && (
-                      <div
-                        onMouseDown={(e) => {
-                          e.preventDefault();
-                          e.stopPropagation();
-                          handleResizeStart(header.id, colIndex, e.clientX, header.getSize());
-                        }}
-                        className="absolute -right-0.5 top-0 z-10 h-full w-2 cursor-col-resize group/resize"
-                        data-testid="column-resize-handle"
-                      >
-                        <div className="mx-auto h-full w-0.5 opacity-0 group-hover/resize:opacity-100 bg-primary/40 transition-opacity" />
-                      </div>
-                    )}
-                  </th>
-                );
-              })}
-            </tr>
-          ))}
-        </thead>
+    <div className="w-full" data-testid="database-table">
+      {/* Filter / Sort / Group toolbar */}
+      <FilterSortBar dbId={database.id} view={view} properties={database.properties} />
 
-        <tbody>
-          {table.getRowModel().rows.map((row) => (
-            <tr
-              key={row.id}
-              className="group/row border-b border-border/15 hover:bg-muted/20 transition-colors"
-              data-testid="database-row"
-            >
-              {row.getVisibleCells().map((cell) => (
-                <td
-                  key={cell.id}
-                  style={{ width: cell.column.getSize() }}
-                  className="h-9 border-r border-border/15 last:border-r-0"
+      <div className="overflow-x-auto">
+        <table ref={tableRef} className="w-full border-collapse" style={{ tableLayout: "fixed" }}>
+          {/* Header */}
+          <thead>
+            {table.getHeaderGroups().map((headerGroup) => (
+              <tr key={headerGroup.id} className="border-b border-border/30">
+                {headerGroup.headers.map((header, colIndex) => {
+                  const isResizable = header.id !== "_actions" && header.id !== "_add_column";
+                  return (
+                    <th
+                      key={header.id}
+                      style={{
+                        width: header.getSize(),
+                        minWidth: header.id === "_actions" ? 32 : MIN_COL_WIDTH,
+                      }}
+                      className="relative h-8 border-r border-border/20 text-left font-normal last:border-r-0"
+                    >
+                      {header.isPlaceholder
+                        ? null
+                        : flexRender(header.column.columnDef.header, header.getContext())}
+                      {isResizable && (
+                        <div
+                          onMouseDown={(e) => {
+                            e.preventDefault();
+                            e.stopPropagation();
+                            handleResizeStart(header.id, colIndex, e.clientX, header.getSize());
+                          }}
+                          className="absolute -right-0.5 top-0 z-10 h-full w-2 cursor-col-resize group/resize"
+                          data-testid="column-resize-handle"
+                        >
+                          <div className="mx-auto h-full w-0.5 opacity-0 group-hover/resize:opacity-100 bg-primary/40 transition-opacity" />
+                        </div>
+                      )}
+                    </th>
+                  );
+                })}
+              </tr>
+            ))}
+          </thead>
+
+          {/* Body — grouped or flat */}
+          <tbody>
+            {groups ? (
+              groups.map((group) => (
+                <GroupSection
+                  key={group.key}
+                  group={group}
+                  dbId={database.id}
+                  columns={columns}
+                  colCount={colCount}
+                  deleteRow={deleteRow}
+                />
+              ))
+            ) : (
+              table.getRowModel().rows.map((row) => (
+                <tr
+                  key={row.id}
+                  className="group/row border-b border-border/15 hover:bg-muted/20 transition-colors"
+                  data-testid="database-row"
                 >
-                  {flexRender(cell.column.columnDef.cell, cell.getContext())}
-                </td>
-              ))}
-            </tr>
-          ))}
-        </tbody>
-      </table>
+                  {row.getVisibleCells().map((cell) => (
+                    <td
+                      key={cell.id}
+                      style={{ width: cell.column.getSize() }}
+                      className="h-9 border-r border-border/15 last:border-r-0"
+                    >
+                      {flexRender(cell.column.columnDef.cell, cell.getContext())}
+                    </td>
+                  ))}
+                </tr>
+              ))
+            )}
+          </tbody>
+        </table>
+      </div>
 
+      {/* Add row */}
       <button
         type="button"
         onClick={() => addRow(database.id)}
@@ -199,5 +228,78 @@ export function TableView({ database }: TableViewProps) {
         New
       </button>
     </div>
+  );
+}
+
+// ─── Group section with collapsible rows ────────────────────────────────────
+
+function GroupSection({
+  group,
+  dbId,
+  columns,
+  colCount,
+  deleteRow,
+}: {
+  group: RowGroup;
+  dbId: string;
+  columns: Parameters<typeof useReactTable<DatabaseRow>>[0]["columns"];
+  colCount: number;
+  deleteRow: (dbId: string, rowId: string) => void;
+}) {
+  const [collapsed, setCollapsed] = useState(false);
+
+  const colorDef = SELECT_COLORS.find((c) => c.value === group.color) ?? SELECT_COLORS[0];
+
+  // Build a mini table for group rows
+  const table = useReactTable({
+    data: group.rows,
+    columns,
+    getCoreRowModel: getCoreRowModel(),
+  });
+
+  return (
+    <>
+      {/* Group header */}
+      <tr className="border-b border-border/20" data-testid="group-header">
+        <td colSpan={colCount} className="px-3 py-2">
+          <button
+            type="button"
+            onClick={() => setCollapsed((v) => !v)}
+            className="flex items-center gap-2"
+            data-testid="group-toggle"
+          >
+            <ChevronRight
+              className={`h-3.5 w-3.5 text-muted-foreground/50 transition-transform ${
+                collapsed ? "" : "rotate-90"
+              }`}
+            />
+            <span className={`inline-flex items-center rounded-sm px-1.5 py-0.5 text-xs font-medium ${colorDef.bg} ${colorDef.text}`}>
+              {group.label}
+            </span>
+            <span className="text-[11px] text-muted-foreground/40">{group.rows.length}</span>
+          </button>
+        </td>
+      </tr>
+
+      {/* Group rows */}
+      {!collapsed &&
+        table.getRowModel().rows.map((row) => (
+          <tr
+            key={row.id}
+            className="group/row border-b border-border/15 hover:bg-muted/20 transition-colors"
+            data-testid="database-row"
+          >
+            {row.getVisibleCells().map((cell) => (
+              <td
+                key={cell.id}
+                style={{ width: cell.column.getSize() }}
+                className="h-9 border-r border-border/15 last:border-r-0"
+              >
+                {flexRender(cell.column.columnDef.cell, cell.getContext())}
+              </td>
+            ))}
+          </tr>
+        ))}
+    </>
   );
 }
