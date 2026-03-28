@@ -30,12 +30,22 @@ export function Dropdown({
   useEffect(() => {
     if (!open || !triggerRef.current) return;
     const rect = triggerRef.current.getBoundingClientRect();
-    const widthPx = parseInt(width.replace("w-", "")) * 4; // approximate tailwind w-N → px
+    const widthPx = parseInt(width.replace("w-", "")) * 4;
     setPos({
       top: rect.bottom + 4,
       left: align === "right" ? rect.right - widthPx : rect.left,
     });
   }, [open, align, width]);
+
+  // Close on Escape
+  useEffect(() => {
+    if (!open) return;
+    const handler = (e: KeyboardEvent) => {
+      if (e.key === "Escape") onOpenChange(false);
+    };
+    window.addEventListener("keydown", handler);
+    return () => window.removeEventListener("keydown", handler);
+  }, [open, onOpenChange]);
 
   return (
     <div ref={triggerRef} className={className ?? "relative h-full"}>

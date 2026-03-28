@@ -65,7 +65,21 @@ function matchesFilter(
     }
   }
 
-  // Text-like (text, title, url, email, phone, date)
+  // Date — chronological comparison
+  if (property.type === "date") {
+    const cellDate = cellValue ? new Date((cellValue as string) + "T00:00:00").getTime() : NaN;
+    const filterDate = filterValue ? new Date(filterValue + "T00:00:00").getTime() : NaN;
+    if (isNaN(cellDate) || isNaN(filterDate)) return false;
+    switch (operator) {
+      case "equals": return cellDate === filterDate;
+      case "does_not_equal": return cellDate !== filterDate;
+      case "greater_than": return cellDate > filterDate;
+      case "less_than": return cellDate < filterDate;
+      default: return true;
+    }
+  }
+
+  // Text-like (text, title, url, email, phone)
   const strVal = ((cellValue as string) ?? "").toLowerCase();
   const filterStr = filterValue.toLowerCase();
   switch (operator) {
@@ -101,8 +115,8 @@ function compareCells(
   a: CellValue,
   b: CellValue,
   property: DatabaseProperty,
+  optionLabelMap: Map<string, string>,
 ): number {
-  // Nulls/empty sort to the end
   const aEmpty = a === null || a === "" || (Array.isArray(a) && a.length === 0);
   const bEmpty = b === null || b === "" || (Array.isArray(b) && b.length === 0);
   if (aEmpty && bEmpty) return 0;
@@ -118,18 +132,13 @@ function compareCells(
   }
 
   if (property.type === "select" || property.type === "status") {
-    // Sort by option label
-    const aOpt = (property.options ?? []).find((o) => o.id === a);
-    const bOpt = (property.options ?? []).find((o) => o.id === b);
-    return (aOpt?.label ?? "").localeCompare(bOpt?.label ?? "");
+    return (optionLabelMap.get(a as string) ?? "").localeCompare(optionLabelMap.get(b as string) ?? "");
   }
 
   if (property.type === "multi_select") {
-    // Sort by number of selected options
     return (a as string[]).length - (b as string[]).length;
   }
 
-  // String comparison for text, date, url, email, phone
   return String(a).localeCompare(String(b));
 }
 
@@ -142,11 +151,19 @@ export function applySorts(
 
   const propMap = new Map(properties.map((p) => [p.id, p]));
 
+  // Pre-build option label maps for O(1) lookups during sort
+  const optionLabelMaps = new Map<string, Map<string, string>>();
+  for (const prop of properties) {
+    if (prop.options) {
+      optionLabelMaps.set(prop.id, new Map(prop.options.map((o) => [o.id, o.label])));
+    }
+  }
+
   return [...rows].sort((a, b) => {
     for (const sort of sorts) {
       const prop = propMap.get(sort.propertyId);
       if (!prop) continue;
-      const cmp = compareCells(a.cells[sort.propertyId], b.cells[sort.propertyId], prop);
+      const cmp = compareCells(a.cells[sort.propertyId], b.cells[sort.propertyId], prop, optionLabelMaps.get(prop.id) ?? new Map());
       if (cmp !== 0) return sort.direction === "asc" ? cmp : -cmp;
     }
     return 0;

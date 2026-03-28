@@ -1,7 +1,7 @@
 "use client";
 
 import { Check, ChevronDown } from "lucide-react";
-import { useState } from "react";
+import { useCallback, useId, useRef, useState } from "react";
 
 import { Dropdown } from "./dropdown";
 
@@ -29,7 +29,53 @@ export function SelectInput({
   width = "w-40",
 }: SelectInputProps) {
   const [open, setOpen] = useState(false);
+  const [focusedIndex, setFocusedIndex] = useState(() =>
+    Math.max(0, options.findIndex((o) => o.value === value)),
+  );
   const selected = options.find((o) => o.value === value);
+  const listboxId = useId();
+  const optionRefs = useRef<(HTMLButtonElement | null)[]>([]);
+
+  const handleOpen = useCallback(() => {
+    setFocusedIndex(Math.max(0, options.findIndex((o) => o.value === value)));
+    setOpen(true);
+  }, [options, value]);
+
+  const handleKeyDown = useCallback(
+    (e: React.KeyboardEvent) => {
+      if (!open) return;
+      switch (e.key) {
+        case "ArrowDown": {
+          e.preventDefault();
+          const next = focusedIndex < options.length - 1 ? focusedIndex + 1 : 0;
+          setFocusedIndex(next);
+          optionRefs.current[next]?.focus();
+          break;
+        }
+        case "ArrowUp": {
+          e.preventDefault();
+          const prev = focusedIndex > 0 ? focusedIndex - 1 : options.length - 1;
+          setFocusedIndex(prev);
+          optionRefs.current[prev]?.focus();
+          break;
+        }
+        case "Enter":
+        case " ": {
+          e.preventDefault();
+          if (options[focusedIndex]) {
+            onChange(options[focusedIndex].value);
+            setOpen(false);
+          }
+          break;
+        }
+        case "Escape":
+          e.preventDefault();
+          setOpen(false);
+          break;
+      }
+    },
+    [open, focusedIndex, options, onChange],
+  );
 
   return (
     <Dropdown
@@ -40,8 +86,11 @@ export function SelectInput({
       trigger={
         <button
           type="button"
-          onClick={() => setOpen((v) => !v)}
+          onClick={handleOpen}
           data-testid={testId}
+          aria-haspopup="listbox"
+          aria-expanded={open}
+          aria-controls={open ? listboxId : undefined}
           className="flex h-7 items-center gap-1 rounded-md border border-border/30 bg-muted/20 px-2 text-xs hover:bg-muted/30 transition-colors"
         >
           {selected?.icon}
@@ -52,19 +101,36 @@ export function SelectInput({
         </button>
       }
     >
-      <div className="max-h-52 overflow-y-auto p-1">
-        {options.map((opt) => (
+      <div
+        id={listboxId}
+        role="listbox"
+        aria-activedescendant={options[focusedIndex] ? `${listboxId}-${focusedIndex}` : undefined}
+        onKeyDown={handleKeyDown}
+        className="max-h-52 overflow-y-auto p-1"
+      >
+        {options.map((opt, i) => (
           <button
             key={opt.value}
+            ref={(el) => { optionRefs.current[i] = el; }}
+            id={`${listboxId}-${i}`}
+            role="option"
+            aria-selected={opt.value === value}
+            tabIndex={i === focusedIndex ? 0 : -1}
             type="button"
             onClick={() => {
               onChange(opt.value);
               setOpen(false);
             }}
-            className={`flex w-full items-center gap-2 rounded-md px-2 py-1.5 text-xs transition-colors ${
+            onMouseEnter={() => setFocusedIndex(i)}
+            onFocus={() => setFocusedIndex(i)}
+            className={`flex w-full items-center gap-2 rounded-md px-2 py-1.5 text-xs transition-colors outline-none ${
+              i === focusedIndex
+                ? "bg-muted/40"
+                : ""
+            } ${
               opt.value === value
-                ? "bg-primary/10 text-primary"
-                : "text-foreground/80 hover:bg-muted/40"
+                ? "text-primary"
+                : "text-foreground/80"
             }`}
           >
             {opt.icon}

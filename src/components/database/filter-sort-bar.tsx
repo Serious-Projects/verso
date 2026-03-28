@@ -7,10 +7,9 @@ import {
   Group,
   Plus,
   SortAsc,
-  Trash2,
   X,
 } from "lucide-react";
-import { useCallback, useState } from "react";
+import { useCallback, useMemo, useState } from "react";
 
 import { useDatabaseStore } from "@/stores/database-store";
 import type {
@@ -189,7 +188,10 @@ function FilterPanel({
   const removeFilter = useDatabaseStore((s) => s.removeFilter);
   const updateView = useDatabaseStore((s) => s.updateView);
 
-  const filterableProps = properties.filter((p) => p.type !== "title");
+  const filterableProps = useMemo(
+    () => properties.filter((p) => p.type !== "title"),
+    [properties],
+  );
 
   const handleAdd = useCallback(() => {
     const prop = filterableProps[0];
@@ -265,41 +267,11 @@ function FilterPanel({
                 />
 
                 {showValue && (
-                  prop?.type === "checkbox" ? (
-                    <SelectInput
-                      value={filter.value || "true"}
-                      options={[
-                        { value: "true", label: "Checked" },
-                        { value: "false", label: "Unchecked" },
-                      ]}
-                      onChange={(v) => handleUpdateFilter(filter.id, { value: v })}
-                      testId="filter-value"
-                      width="w-28"
-                    />
-                  ) : prop?.type === "select" || prop?.type === "multi_select" || prop?.type === "status" ? (
-                    <SelectInput
-                      value={filter.value}
-                      options={[
-                        { value: "", label: "Select..." },
-                        ...(prop.options ?? []).map((opt) => ({
-                          value: opt.id,
-                          label: opt.label,
-                        })),
-                      ]}
-                      onChange={(v) => handleUpdateFilter(filter.id, { value: v })}
-                      testId="filter-value"
-                      width="w-32"
-                    />
-                  ) : (
-                    <input
-                      type={prop?.type === "number" ? "number" : "text"}
-                      value={filter.value}
-                      onChange={(e) => handleUpdateFilter(filter.id, { value: e.target.value })}
-                      placeholder="Value..."
-                      className="h-7 min-w-0 flex-1 rounded-md border border-border/30 bg-muted/20 px-2 text-xs outline-none placeholder:text-muted-foreground/30"
-                      data-testid="filter-value"
-                    />
-                  )
+                  <FilterValueInput
+                    prop={prop}
+                    value={filter.value}
+                    onChange={(v) => handleUpdateFilter(filter.id, { value: v })}
+                  />
                 )}
 
                 <button
@@ -329,6 +301,62 @@ function FilterPanel({
   );
 }
 
+// ─── Filter Value Input ─────────────────────────────────────────────────────
+
+function FilterValueInput({
+  prop,
+  value,
+  onChange,
+}: {
+  prop: DatabaseProperty | undefined;
+  value: string;
+  onChange: (value: string) => void;
+}) {
+  if (prop?.type === "checkbox") {
+    return (
+      <SelectInput
+        value={value || "true"}
+        options={[
+          { value: "true", label: "Checked" },
+          { value: "false", label: "Unchecked" },
+        ]}
+        onChange={onChange}
+        testId="filter-value"
+        width="w-28"
+      />
+    );
+  }
+
+  if (prop?.type === "select" || prop?.type === "multi_select" || prop?.type === "status") {
+    return (
+      <SelectInput
+        value={value}
+        options={[
+          { value: "", label: "Select..." },
+          ...(prop.options ?? []).map((opt) => ({
+            value: opt.id,
+            label: opt.label,
+          })),
+        ]}
+        onChange={onChange}
+        testId="filter-value"
+        width="w-32"
+      />
+    );
+  }
+
+  return (
+    <input
+      type={prop?.type === "number" ? "number" : "text"}
+      value={value}
+      onChange={(e) => onChange(e.target.value)}
+      placeholder="Value..."
+      className="h-7 min-w-0 flex-1 rounded-md border border-border/30 bg-muted/20 px-2 text-xs outline-none placeholder:text-muted-foreground/30"
+      data-testid="filter-value"
+    />
+  );
+}
+
 // ─── Sort Panel ─────────────────────────────────────────────────────────────
 
 function SortPanel({
@@ -348,8 +376,8 @@ function SortPanel({
 
   const handleAdd = useCallback(() => {
     const usedIds = new Set(view.sorts.map((s) => s.propertyId));
-    const prop = sortableProps.find((p) => !usedIds.has(p.id)) ?? sortableProps[0];
-    if (!prop) return;
+    const prop = sortableProps.find((p) => !usedIds.has(p.id));
+    if (!prop) return; // all properties already have a sort rule
     addSort(dbId, view.id, { propertyId: prop.id, direction: "asc" });
   }, [sortableProps, view.sorts, addSort, dbId, view.id]);
 
@@ -457,7 +485,7 @@ function GroupPanel({
           !view.groupBy ? "bg-muted/30 text-primary font-medium" : "text-foreground/80"
         }`}
       >
-        <Trash2 className="h-3 w-3 text-muted-foreground/40" />
+        <X className="h-3 w-3 text-muted-foreground/40" />
         None
       </button>
 

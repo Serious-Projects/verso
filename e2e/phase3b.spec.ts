@@ -138,7 +138,7 @@ test.describe("Filters", () => {
     await page.locator("text=Done").click();
     await page.waitForTimeout(300);
     // Close filter panel
-    await page.mouse.click(10, 10);
+    await page.keyboard.press("Escape");
     await page.waitForTimeout(200);
     // Should show only 1 row (Alice with Done status)
     await expect(page.locator('[data-testid="database-row"]')).toHaveCount(1);
@@ -162,7 +162,7 @@ test.describe("Filters", () => {
     await page.locator('[data-testid="filter-remove"]').click();
     await page.waitForTimeout(200);
     // Close
-    await page.mouse.click(10, 10);
+    await page.keyboard.press("Escape");
     await page.waitForTimeout(200);
     await expect(page.locator('[data-testid="database-row"]')).toHaveCount(3);
   });
@@ -276,7 +276,7 @@ test.describe("Grouping", () => {
     await page.waitForTimeout(200);
     await page.locator('[data-testid="group-by-status"]').click();
     await page.waitForTimeout(300);
-    await page.mouse.click(10, 10);
+    await page.keyboard.press("Escape");
     await page.waitForTimeout(200);
 
     // Should show group headers
@@ -295,7 +295,7 @@ test.describe("Grouping", () => {
     await page.waitForTimeout(200);
     await page.locator('[data-testid="group-by-status"]').click();
     await page.waitForTimeout(300);
-    await page.mouse.click(10, 10);
+    await page.keyboard.press("Escape");
     await page.waitForTimeout(200);
 
     // Each group should show count "1"
@@ -314,7 +314,7 @@ test.describe("Grouping", () => {
     await page.waitForTimeout(200);
     await page.locator('[data-testid="group-by-status"]').click();
     await page.waitForTimeout(300);
-    await page.mouse.click(10, 10);
+    await page.keyboard.press("Escape");
     await page.waitForTimeout(200);
 
     // 3 groups with 1 row each = 3 data rows visible
@@ -338,7 +338,7 @@ test.describe("Grouping", () => {
     await page.waitForTimeout(200);
     await page.locator('[data-testid="group-by-status"]').click();
     await page.waitForTimeout(200);
-    await page.mouse.click(10, 10);
+    await page.keyboard.press("Escape");
     await page.waitForTimeout(200);
     await expect(page.locator('[data-testid="group-header"]').first()).toBeVisible();
 
@@ -347,7 +347,7 @@ test.describe("Grouping", () => {
     await page.waitForTimeout(200);
     await page.locator('[data-testid="group-none"]').click();
     await page.waitForTimeout(200);
-    await page.mouse.click(10, 10);
+    await page.keyboard.press("Escape");
     await page.waitForTimeout(200);
 
     // No group headers
@@ -380,7 +380,7 @@ test.describe("Filter + Sort combined", () => {
     await page.waitForTimeout(200);
     await page.locator('[data-testid="add-sort-btn"]').click();
     await page.waitForTimeout(200);
-    await page.mouse.click(10, 10);
+    await page.keyboard.press("Escape");
     await page.waitForTimeout(200);
 
     // After sort: Alice, Bob, Charlie

@@ -188,10 +188,8 @@ export function TableView({ database }: TableViewProps) {
                 <GroupSection
                   key={group.key}
                   group={group}
-                  dbId={database.id}
                   columns={columns}
                   colCount={colCount}
-                  deleteRow={deleteRow}
                 />
               ))
             ) : (
@@ -235,16 +233,12 @@ export function TableView({ database }: TableViewProps) {
 
 function GroupSection({
   group,
-  dbId,
   columns,
   colCount,
-  deleteRow,
 }: {
   group: RowGroup;
-  dbId: string;
   columns: Parameters<typeof useReactTable<DatabaseRow>>[0]["columns"];
   colCount: number;
-  deleteRow: (dbId: string, rowId: string) => void;
 }) {
   const [collapsed, setCollapsed] = useState(false);
 
