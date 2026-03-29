@@ -2,10 +2,12 @@
 
 import type { NodeViewProps } from "@tiptap/react";
 import { NodeViewWrapper } from "@tiptap/react";
-import { Database as DatabaseIcon, Kanban, Table2 } from "lucide-react";
+import { Calendar, Database as DatabaseIcon, GalleryHorizontalEnd, Kanban, Table2 } from "lucide-react";
 import { useCallback, useEffect, useRef, useState } from "react";
 
 import { BoardView } from "@/components/database/board-view";
+import { CalendarView } from "@/components/database/calendar-view";
+import { GalleryView } from "@/components/database/gallery-view";
 import { TableView } from "@/components/database/table-view";
 import { useDatabaseStore } from "@/stores/database-store";
 
@@ -52,13 +54,14 @@ export function DatabaseBlockView({ node, updateAttributes }: NodeViewProps) {
   }, [resolvedId, titleVal, updateDatabaseTitle]);
 
   const handleSwitchView = useCallback(
-    (type: "table" | "board") => {
+    (type: "table" | "board" | "calendar" | "gallery") => {
       if (!database) return;
       const existing = database.views.find((v) => v.type === type);
       if (existing) {
         setActiveView(database.id, existing.id);
       } else {
-        const name = type === "board" ? "Board view" : "Table view";
+        const nameMap = { table: "Table view", board: "Board view", calendar: "Calendar view", gallery: "Gallery view" };
+        const name = nameMap[type];
         addView(database.id, type, name);
       }
     },
@@ -136,12 +139,42 @@ export function DatabaseBlockView({ node, updateAttributes }: NodeViewProps) {
               <Kanban className="h-3 w-3" />
               Board
             </button>
+            <button
+              type="button"
+              onClick={() => handleSwitchView("calendar")}
+              data-testid="view-tab-calendar"
+              className={`flex items-center gap-1 rounded-md px-2 py-1 text-[11px] font-medium transition-colors ${
+                activeType === "calendar"
+                  ? "bg-background text-foreground shadow-sm"
+                  : "text-muted-foreground/50 hover:text-muted-foreground"
+              }`}
+            >
+              <Calendar className="h-3 w-3" />
+              Calendar
+            </button>
+            <button
+              type="button"
+              onClick={() => handleSwitchView("gallery")}
+              data-testid="view-tab-gallery"
+              className={`flex items-center gap-1 rounded-md px-2 py-1 text-[11px] font-medium transition-colors ${
+                activeType === "gallery"
+                  ? "bg-background text-foreground shadow-sm"
+                  : "text-muted-foreground/50 hover:text-muted-foreground"
+              }`}
+            >
+              <GalleryHorizontalEnd className="h-3 w-3" />
+              Gallery
+            </button>
           </div>
         </div>
 
         {/* Active view */}
         {activeType === "board" ? (
           <BoardView database={database} />
+        ) : activeType === "calendar" ? (
+          <CalendarView database={database} />
+        ) : activeType === "gallery" ? (
+          <GalleryView database={database} />
         ) : (
           <TableView database={database} />
         )}

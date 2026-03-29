@@ -197,6 +197,8 @@ export function Editor({ pageId }: EditorProps) {
           return "Type '/' for commands...";
         },
         includeChildren: true,
+        showOnlyCurrent: true,
+        showOnlyWhenEditable: true,
         emptyEditorClass:
           "before:content-[attr(data-placeholder)] before:text-muted-foreground before:float-left before:h-0 before:pointer-events-none",
       }),
