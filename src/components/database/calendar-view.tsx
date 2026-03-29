@@ -11,8 +11,18 @@ import { FilterSortBar } from "./filter-sort-bar";
 
 const DAYS = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
 const MONTHS = [
-  "January", "February", "March", "April", "May", "June",
-  "July", "August", "September", "October", "November", "December",
+  "January",
+  "February",
+  "March",
+  "April",
+  "May",
+  "June",
+  "July",
+  "August",
+  "September",
+  "October",
+  "November",
+  "December",
 ];
 
 interface CalendarViewProps {
@@ -23,8 +33,8 @@ export function CalendarView({ database }: CalendarViewProps) {
   const addRow = useDatabaseStore((s) => s.addRow);
   const updateCell = useDatabaseStore((s) => s.updateCell);
 
-  const view = database.views.find((v) => v.id === database.activeViewId) ?? database.views[0];
-  if (!view) return null;
+  const view =
+    database.views.find((v) => v.id === database.activeViewId) ?? database.views[0] ?? null;
 
   const dateProperty = useMemo(
     () => database.properties.find((p) => p.type === "date"),
@@ -33,8 +43,11 @@ export function CalendarView({ database }: CalendarViewProps) {
 
   const titleProp = database.properties.find((p) => p.type === "title");
 
-  const { rows: filteredRows } = useMemo(
-    () => processRows(database.rows, { ...view, groupBy: undefined }, database.properties),
+  const filteredRows = useMemo(
+    () =>
+      view
+        ? processRows(database.rows, { ...view, groupBy: undefined }, database.properties).rows
+        : [],
     [database.rows, database.properties, view],
   );
 
@@ -43,19 +56,24 @@ export function CalendarView({ database }: CalendarViewProps) {
   const [viewMonth, setViewMonth] = useState(today.getMonth());
 
   const prevMonth = useCallback(() => {
-    if (viewMonth === 0) { setViewMonth(11); setViewYear((y) => y - 1); }
-    else setViewMonth((m) => m - 1);
+    if (viewMonth === 0) {
+      setViewMonth(11);
+      setViewYear((y) => y - 1);
+    } else setViewMonth((m) => m - 1);
   }, [viewMonth]);
 
   const nextMonth = useCallback(() => {
-    if (viewMonth === 11) { setViewMonth(0); setViewYear((y) => y + 1); }
-    else setViewMonth((m) => m + 1);
+    if (viewMonth === 11) {
+      setViewMonth(0);
+      setViewYear((y) => y + 1);
+    } else setViewMonth((m) => m + 1);
   }, [viewMonth]);
 
   const goToday = useCallback(() => {
-    setViewYear(today.getFullYear());
-    setViewMonth(today.getMonth());
-  }, [today]);
+    const now = new Date();
+    setViewYear(now.getFullYear());
+    setViewMonth(now.getMonth());
+  }, []);
 
   const daysInMonth = new Date(viewYear, viewMonth + 1, 0).getDate();
   const firstDayOfWeek = new Date(viewYear, viewMonth, 1).getDay();
@@ -84,9 +102,14 @@ export function CalendarView({ database }: CalendarViewProps) {
     [addRow, updateCell, database.id, dateProperty, viewYear, viewMonth],
   );
 
+  if (!view) return null;
+
   if (!dateProperty) {
     return (
-      <div className="flex items-center justify-center px-4 py-12 text-sm text-muted-foreground/50" data-testid="calendar-no-property">
+      <div
+        className="flex items-center justify-center px-4 py-12 text-sm text-muted-foreground/50"
+        data-testid="calendar-no-property"
+      >
         Add a Date column to use Calendar view
       </div>
     );
@@ -110,7 +133,10 @@ export function CalendarView({ database }: CalendarViewProps) {
             >
               <ChevronLeft className="h-4 w-4" />
             </button>
-            <span className="text-sm font-semibold min-w-[140px] text-center" data-testid="calendar-month-label">
+            <span
+              className="text-sm font-semibold min-w-35 text-center"
+              data-testid="calendar-month-label"
+            >
               {MONTHS[viewMonth]} {viewYear}
             </span>
             <button
@@ -133,7 +159,10 @@ export function CalendarView({ database }: CalendarViewProps) {
 
         <div className="grid grid-cols-7 gap-px rounded-lg border border-border/20 bg-border/20 overflow-hidden">
           {DAYS.map((d) => (
-            <div key={d} className="bg-muted/30 px-2 py-1.5 text-center text-[11px] font-medium text-muted-foreground/50">
+            <div
+              key={d}
+              className="bg-muted/30 px-2 py-1.5 text-center text-[11px] font-medium text-muted-foreground/50"
+            >
               {d}
             </div>
           ))}
@@ -155,11 +184,13 @@ export function CalendarView({ database }: CalendarViewProps) {
                 data-testid="calendar-cell"
               >
                 <div className="flex items-center justify-between mb-1">
-                  <span className={`text-xs font-medium leading-none ${
-                    todayMark
-                      ? "flex h-5 w-5 items-center justify-center rounded-full bg-primary text-primary-foreground text-[11px]"
-                      : "text-muted-foreground/60 pl-0.5"
-                  }`}>
+                  <span
+                    className={`text-xs font-medium leading-none ${
+                      todayMark
+                        ? "flex h-5 w-5 items-center justify-center rounded-full bg-primary text-primary-foreground text-[11px]"
+                        : "text-muted-foreground/60 pl-0.5"
+                    }`}
+                  >
                     {day}
                   </span>
                   <button
@@ -208,19 +239,23 @@ function CalendarCard({
   const title = titleProp ? (row.cells[titleProp.id] as string) || "Untitled" : "Untitled";
 
   const statusProp = properties.find((p) => p.type === "select" || p.type === "status");
-  let accentColor = "bg-primary/60";
+  let accentBg = "bg-primary/20 dark:bg-primary/30";
+  let accentText = "text-foreground/80";
   if (statusProp) {
     const optId = row.cells[statusProp.id] as string | null;
     const opt = (statusProp.options ?? []).find((o) => o.id === optId);
     if (opt) {
       const colorDef = SELECT_COLORS.find((c) => c.value === opt.color);
-      if (colorDef) accentColor = colorDef.bg.split(" ")[0];
+      if (colorDef) {
+        accentBg = colorDef.bg;
+        accentText = colorDef.text;
+      }
     }
   }
 
   return (
     <div
-      className={`truncate rounded px-1.5 py-0.5 text-[11px] leading-tight ${accentColor} cursor-default`}
+      className={`truncate rounded px-1.5 py-0.5 text-[11px] leading-tight ${accentBg} ${accentText} cursor-default`}
       data-testid="calendar-card"
       title={title}
     >

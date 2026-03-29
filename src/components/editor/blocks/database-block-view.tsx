@@ -2,7 +2,14 @@
 
 import type { NodeViewProps } from "@tiptap/react";
 import { NodeViewWrapper } from "@tiptap/react";
-import { Calendar, Database as DatabaseIcon, GalleryHorizontalEnd, Kanban, Table2 } from "lucide-react";
+import {
+  Calendar,
+  Database as DatabaseIcon,
+  GalleryHorizontalEnd,
+  Kanban,
+  type LucideIcon,
+  Table2,
+} from "lucide-react";
 import { useCallback, useEffect, useRef, useState } from "react";
 
 import { BoardView } from "@/components/database/board-view";
@@ -10,6 +17,23 @@ import { CalendarView } from "@/components/database/calendar-view";
 import { GalleryView } from "@/components/database/gallery-view";
 import { TableView } from "@/components/database/table-view";
 import { useDatabaseStore } from "@/stores/database-store";
+import type { Database, DatabaseView } from "@/types/database";
+
+type ViewType = DatabaseView["type"];
+
+const VIEW_TABS: { type: ViewType; label: string; Icon: LucideIcon }[] = [
+  { type: "table", label: "Table", Icon: Table2 },
+  { type: "board", label: "Board", Icon: Kanban },
+  { type: "calendar", label: "Calendar", Icon: Calendar },
+  { type: "gallery", label: "Gallery", Icon: GalleryHorizontalEnd },
+];
+
+const VIEW_COMPONENTS: Record<ViewType, React.ComponentType<{ database: Database }>> = {
+  table: TableView,
+  board: BoardView,
+  calendar: CalendarView,
+  gallery: GalleryView,
+};
 
 export function DatabaseBlockView({ node, updateAttributes }: NodeViewProps) {
   const attrDbId = node.attrs.databaseId as string;
@@ -60,7 +84,12 @@ export function DatabaseBlockView({ node, updateAttributes }: NodeViewProps) {
       if (existing) {
         setActiveView(database.id, existing.id);
       } else {
-        const nameMap = { table: "Table view", board: "Board view", calendar: "Calendar view", gallery: "Gallery view" };
+        const nameMap = {
+          table: "Table view",
+          board: "Board view",
+          calendar: "Calendar view",
+          gallery: "Gallery view",
+        };
         const name = nameMap[type];
         addView(database.id, type, name);
       }
@@ -71,7 +100,10 @@ export function DatabaseBlockView({ node, updateAttributes }: NodeViewProps) {
   if (!database) {
     return (
       <NodeViewWrapper>
-        <div className="my-4 rounded-xl border border-border/30 bg-muted/10 p-8" data-testid="database-block-loading">
+        <div
+          className="my-4 rounded-xl border border-border/30 bg-muted/10 p-8"
+          data-testid="database-block-loading"
+        >
           <div className="flex items-center gap-3 text-muted-foreground/40">
             <DatabaseIcon className="h-5 w-5" />
             <span className="text-sm">Loading database...</span>
@@ -81,7 +113,8 @@ export function DatabaseBlockView({ node, updateAttributes }: NodeViewProps) {
     );
   }
 
-  const activeView = database.views.find((v) => v.id === database.activeViewId) ?? database.views[0];
+  const activeView =
+    database.views.find((v) => v.id === database.activeViewId) ?? database.views[0];
   const activeType = activeView?.type ?? "table";
 
   return (
@@ -111,73 +144,30 @@ export function DatabaseBlockView({ node, updateAttributes }: NodeViewProps) {
             placeholder="Untitled Database"
           />
 
-          {/* View tabs */}
           <div className="flex items-center gap-0.5 rounded-lg border border-border/20 bg-muted/20 p-0.5">
-            <button
-              type="button"
-              onClick={() => handleSwitchView("table")}
-              data-testid="view-tab-table"
-              className={`flex items-center gap-1 rounded-md px-2 py-1 text-[11px] font-medium transition-colors ${
-                activeType === "table"
-                  ? "bg-background text-foreground shadow-sm"
-                  : "text-muted-foreground/50 hover:text-muted-foreground"
-              }`}
-            >
-              <Table2 className="h-3 w-3" />
-              Table
-            </button>
-            <button
-              type="button"
-              onClick={() => handleSwitchView("board")}
-              data-testid="view-tab-board"
-              className={`flex items-center gap-1 rounded-md px-2 py-1 text-[11px] font-medium transition-colors ${
-                activeType === "board"
-                  ? "bg-background text-foreground shadow-sm"
-                  : "text-muted-foreground/50 hover:text-muted-foreground"
-              }`}
-            >
-              <Kanban className="h-3 w-3" />
-              Board
-            </button>
-            <button
-              type="button"
-              onClick={() => handleSwitchView("calendar")}
-              data-testid="view-tab-calendar"
-              className={`flex items-center gap-1 rounded-md px-2 py-1 text-[11px] font-medium transition-colors ${
-                activeType === "calendar"
-                  ? "bg-background text-foreground shadow-sm"
-                  : "text-muted-foreground/50 hover:text-muted-foreground"
-              }`}
-            >
-              <Calendar className="h-3 w-3" />
-              Calendar
-            </button>
-            <button
-              type="button"
-              onClick={() => handleSwitchView("gallery")}
-              data-testid="view-tab-gallery"
-              className={`flex items-center gap-1 rounded-md px-2 py-1 text-[11px] font-medium transition-colors ${
-                activeType === "gallery"
-                  ? "bg-background text-foreground shadow-sm"
-                  : "text-muted-foreground/50 hover:text-muted-foreground"
-              }`}
-            >
-              <GalleryHorizontalEnd className="h-3 w-3" />
-              Gallery
-            </button>
+            {VIEW_TABS.map(({ type, label, Icon }) => (
+              <button
+                key={type}
+                type="button"
+                onClick={() => handleSwitchView(type)}
+                data-testid={`view-tab-${type}`}
+                className={`flex items-center gap-1 rounded-md px-2 py-1 text-[11px] font-medium transition-colors ${
+                  activeType === type
+                    ? "bg-background text-foreground shadow-sm"
+                    : "text-muted-foreground/50 hover:text-muted-foreground"
+                }`}
+              >
+                <Icon className="h-3 w-3" />
+                {label}
+              </button>
+            ))}
           </div>
         </div>
 
-        {/* Active view */}
-        {activeType === "board" ? (
-          <BoardView database={database} />
-        ) : activeType === "calendar" ? (
-          <CalendarView database={database} />
-        ) : activeType === "gallery" ? (
-          <GalleryView database={database} />
-        ) : (
-          <TableView database={database} />
-        )}
+        {(() => {
+          const ViewComponent = VIEW_COMPONENTS[activeType] ?? TableView;
+          return <ViewComponent database={database} />;
+        })()}
       </div>
     </NodeViewWrapper>
   );

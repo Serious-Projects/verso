@@ -1,7 +1,7 @@
 "use client";
 
 import { Plus } from "lucide-react";
-import { useMemo } from "react";
+import { useMemo, useState } from "react";
 
 import { useDatabaseStore } from "@/stores/database-store";
 import type { Database, DatabaseProperty, DatabaseRow } from "@/types/database";
@@ -16,8 +16,8 @@ interface GalleryViewProps {
 export function GalleryView({ database }: GalleryViewProps) {
   const addRow = useDatabaseStore((s) => s.addRow);
 
-  const view = database.views.find((v) => v.id === database.activeViewId) ?? database.views[0];
-  if (!view) return null;
+  const view =
+    database.views.find((v) => v.id === database.activeViewId) ?? database.views[0] ?? null;
 
   const titleProp = database.properties.find((p) => p.type === "title");
   const imageProp = database.properties.find((p) => p.type === "url");
@@ -27,9 +27,14 @@ export function GalleryView({ database }: GalleryViewProps) {
   );
 
   const { rows: filteredRows } = useMemo(
-    () => processRows(database.rows, { ...view, groupBy: undefined }, database.properties),
+    () =>
+      view
+        ? processRows(database.rows, { ...view, groupBy: undefined }, database.properties)
+        : { rows: [], groups: null },
     [database.rows, database.properties, view],
   );
+
+  if (!view) return null;
 
   return (
     <div data-testid="gallery-view">
@@ -72,29 +77,35 @@ function GalleryCard({
 }) {
   const title = titleProp ? (row.cells[titleProp.id] as string) || "Untitled" : "Untitled";
   const imageUrl = imageProp ? (row.cells[imageProp.id] as string) || "" : "";
+  const [imgFailed, setImgFailed] = useState(false);
+
+  const showImage = imageUrl && !imgFailed;
 
   return (
     <div
       className="group/card overflow-hidden rounded-xl border border-border/15 bg-background transition-all duration-200 hover:border-border/30 hover:shadow-md"
       data-testid="gallery-card"
     >
-      {imageUrl ? (
+      {showImage ? (
         <div className="aspect-video w-full overflow-hidden bg-muted/20">
           <img
             src={imageUrl}
             alt={title}
             className="h-full w-full object-cover"
             loading="lazy"
+            onError={() => setImgFailed(true)}
           />
         </div>
       ) : (
-        <div className="aspect-video w-full bg-gradient-to-br from-muted/20 to-muted/5" />
+        <div className="aspect-video w-full bg-linear-to-br from-muted/20 to-muted/5" />
       )}
 
       <div className="p-3">
-        <p className={`text-sm font-semibold leading-snug truncate ${
-          title === "Untitled" ? "text-muted-foreground/30 italic" : "text-foreground"
-        }`}>
+        <p
+          className={`text-sm font-semibold leading-snug truncate ${
+            title === "Untitled" ? "text-muted-foreground/30 italic" : "text-foreground"
+          }`}
+        >
           {title}
         </p>
 
@@ -102,7 +113,13 @@ function GalleryCard({
           <div className="mt-2 flex flex-wrap gap-1.5">
             {previewProps.map((prop) => {
               const val = row.cells[prop.id];
-              if (val === null || val === undefined || val === "" || (Array.isArray(val) && val.length === 0)) return null;
+              if (
+                val === null ||
+                val === undefined ||
+                val === "" ||
+                (Array.isArray(val) && val.length === 0)
+              )
+                return null;
               return <GalleryPropertyValue key={prop.id} property={prop} value={val} />;
             })}
           </div>
@@ -122,7 +139,9 @@ function GalleryPropertyValue({ property, value }: { property: DatabaseProperty;
     if (!opt) return null;
     const colorDef = SELECT_COLORS.find((c) => c.value === opt.color) ?? SELECT_COLORS[0];
     return (
-      <span className={`inline-flex items-center rounded-sm px-1 py-0.5 text-[10px] font-medium ${colorDef.bg} ${colorDef.text}`}>
+      <span
+        className={`inline-flex items-center rounded-sm px-1 py-0.5 text-[10px] font-medium ${colorDef.bg} ${colorDef.text}`}
+      >
         {opt.label}
       </span>
     );
@@ -131,12 +150,15 @@ function GalleryPropertyValue({ property, value }: { property: DatabaseProperty;
   if (property.type === "multi_select") {
     return (
       <>
-        {((value as string[]) ?? []).map((optId) => {
+        {(Array.isArray(value) ? value : []).map((optId) => {
           const opt = (property.options ?? []).find((o) => o.id === optId);
           if (!opt) return null;
           const colorDef = SELECT_COLORS.find((c) => c.value === opt.color) ?? SELECT_COLORS[0];
           return (
-            <span key={optId} className={`inline-flex items-center rounded-sm px-1 py-0.5 text-[10px] font-medium ${colorDef.bg} ${colorDef.text}`}>
+            <span
+              key={optId}
+              className={`inline-flex items-center rounded-sm px-1 py-0.5 text-[10px] font-medium ${colorDef.bg} ${colorDef.text}`}
+            >
               {opt.label}
             </span>
           );
@@ -148,14 +170,15 @@ function GalleryPropertyValue({ property, value }: { property: DatabaseProperty;
   if (property.type === "date") {
     return (
       <span className="text-[10px] text-muted-foreground/60">
-        {new Date((value as string) + "T00:00:00").toLocaleDateString("en-IN", { month: "short", day: "numeric" })}
+        {new Date((value as string) + "T00:00:00").toLocaleDateString("en-IN", {
+          month: "short",
+          day: "numeric",
+        })}
       </span>
     );
   }
 
   return (
-    <span className="text-[10px] text-muted-foreground/60 truncate max-w-32">
-      {String(value)}
-    </span>
+    <span className="text-[10px] text-muted-foreground/60 truncate max-w-32">{String(value)}</span>
   );
 }

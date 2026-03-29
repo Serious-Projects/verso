@@ -235,7 +235,6 @@ export function BoardView({ database }: BoardViewProps) {
   );
 }
 
-
 function BoardColumn({
   id,
   label,
