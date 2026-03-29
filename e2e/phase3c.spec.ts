@@ -3,8 +3,7 @@ import { expect, test } from "@playwright/test";
 // ─── helpers ────────────────────────────────────────────────────────────────
 
 async function createPage(page: import("@playwright/test").Page) {
-  await page.goto("/");
-  await page.waitForURL(/\/workspace/);
+  await page.goto("/workspace");
   await page.waitForSelector('[data-testid="page-title"]');
 }
 

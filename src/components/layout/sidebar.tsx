@@ -26,9 +26,18 @@ import { usePageStore } from "@/stores/page-store";
 import { ThemeToggle } from "./theme-toggle";
 
 export function Sidebar() {
-  const { sidebarOpen, toggleSidebar } = useEditorStore();
+  const { sidebarOpen, toggleSidebar, setSidebarOpen } = useEditorStore();
   const { pages, createPage, getRootPageIds } = usePageStore();
   const router = useRouter();
+
+  const navigateTo = useCallback(
+    (path: string) => {
+      router.push(path);
+      // Close sidebar on mobile after navigation
+      if (window.innerWidth < 768) setSidebarOpen(false);
+    },
+    [router, setSidebarOpen],
+  );
   const [searchOpen, setSearchOpen] = useState(false);
   const [trashOpen, setTrashOpen] = useState(false);
 
@@ -106,12 +115,21 @@ export function Sidebar() {
       {/* Sidebar panel */}
       <AnimatePresence>
         {sidebarOpen && (
+          <>
+            {/* Mobile backdrop */}
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              className="fixed inset-0 z-40 bg-black/40 md:hidden"
+              onClick={toggleSidebar}
+            />
           <motion.aside
             initial={{ width: 0, opacity: 0 }}
             animate={{ width: 272, opacity: 1 }}
             exit={{ width: 0, opacity: 0 }}
             transition={{ duration: 0.2, ease: "easeInOut" }}
-            className="flex h-screen flex-col border-r border-sidebar-border bg-sidebar overflow-hidden"
+            className="fixed z-50 md:relative flex h-screen flex-col border-r border-sidebar-border bg-sidebar overflow-hidden"
           >
             {/* Header */}
             <div className="flex items-center justify-between px-3 py-3 border-b border-sidebar-border/50">
@@ -252,6 +270,7 @@ export function Sidebar() {
               </div>
             </div>
           </motion.aside>
+          </>
         )}
       </AnimatePresence>
     </>

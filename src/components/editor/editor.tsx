@@ -244,7 +244,7 @@ export function Editor({ pageId }: EditorProps) {
     content: "",
     editorProps: {
       attributes: {
-        class: "verso-editor min-h-[50vh] px-16 pb-32 focus:outline-none",
+        class: "verso-editor min-h-[50vh] px-4 sm:px-8 md:px-16 pb-32 focus:outline-none",
       },
     },
     onUpdate: ({ editor: e }) => {
@@ -459,7 +459,7 @@ export function Editor({ pageId }: EditorProps) {
       <Breadcrumbs pageId={pageId} />
 
       {/* Page header */}
-      <div className={`px-16 pb-6 ${page?.coverColor ? "pt-6" : "pt-16"}`}>
+      <div className={`px-4 sm:px-8 md:px-16 pb-6 ${page?.coverColor ? "pt-6" : "pt-8 sm:pt-12 md:pt-16"}`}>
         {/* Icon row — icon on the left, cover+font controls fade in beside it on hover */}
         <div className="group/header flex items-center gap-2 mb-5">
           {/* Icon button + picker (relative for dropdown positioning) */}
@@ -624,7 +624,7 @@ export function Editor({ pageId }: EditorProps) {
           onKeyDown={handleTitleKeyDown}
           data-testid="page-title"
           data-placeholder="Untitled"
-          className={`page-title ${titleIsEmpty ? "is-empty" : ""} text-5xl font-black leading-[1.1] tracking-[-0.04em] text-foreground outline-none ${fontClass}`}
+          className={`page-title ${titleIsEmpty ? "is-empty" : ""} text-3xl sm:text-4xl md:text-5xl font-black leading-[1.1] tracking-[-0.04em] text-foreground outline-none ${fontClass}`}
         />
       </div>
 

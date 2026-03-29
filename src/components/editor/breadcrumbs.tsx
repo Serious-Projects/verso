@@ -36,7 +36,7 @@ export function Breadcrumbs({ pageId }: BreadcrumbsProps) {
       initial={{ opacity: 0, y: -4 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.2, ease: "easeOut" }}
-      className="flex items-center gap-0.5 px-16 pt-5 pb-0 select-none"
+      className="flex items-center gap-0.5 px-4 sm:px-8 md:px-16 pt-5 pb-0 select-none"
       aria-label="Page breadcrumb"
       data-testid="breadcrumbs"
     >

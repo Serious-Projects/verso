@@ -19,11 +19,15 @@ const firaCode = Fira_Code({
 });
 
 export const metadata: Metadata = {
-  title: "Verso",
-  description: "Your workspace, your way.",
+  title: {
+    default: "Verso — Your workspace, your way",
+    template: "%s | Verso",
+  },
+  description: "A production-grade Notion alternative with a block editor, databases, kanban boards, and calendar views.",
   icons: {
     icon: "/images/logo-mark.svg",
   },
+  metadataBase: new URL("https://verso.app"),
 };
 
 export default function RootLayout({
