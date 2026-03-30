@@ -42,7 +42,7 @@ async function slashSelect(page: Page, filter: string) {
     await page.waitForTimeout(80);
   }
   // Wait for the slash menu to appear
-  const menu = page.locator(".fixed.z-50.w-72");
+  const menu = page.getByTestId("slash-menu");
   await menu.waitFor({ state: "visible", timeout: 3000 });
   // Extra wait for React to finish rendering filtered items
   await page.waitForTimeout(300);
@@ -259,7 +259,7 @@ test.describe("Inline formatting", () => {
 test.describe("Slash command menu", () => {
   test.beforeEach(freshEditor());
 
-  const slashMenu = (page: Page) => page.locator(".fixed.z-50.w-72");
+  const slashMenu = (page: Page) => page.getByTestId("slash-menu");
 
   test("/ opens menu with all items", async ({ page }) => {
     await (await getEditor(page)).click();
@@ -442,8 +442,7 @@ test.describe("Slash command menu", () => {
 test.describe("Bubble menu", () => {
   test.beforeEach(freshEditor());
 
-  const bubbleMenu = (page: Page) =>
-    page.locator(".fixed.z-50.flex.items-center");
+  const bubbleMenu = (page: Page) => page.locator(".fixed.z-50.flex.items-center");
 
   test("appears on text selection", async ({ page }) => {
     await (await getEditor(page)).click();
@@ -538,9 +537,7 @@ test.describe("Bubble menu", () => {
     expect(html).toMatch(/color.*220.*38.*38/);
   });
 
-  test("highlight color dropdown opens and applies background", async ({
-    page,
-  }) => {
+  test("highlight color dropdown opens and applies background", async ({ page }) => {
     await (await getEditor(page)).click();
     await page.keyboard.type("Highlight me");
     await selectAll(page);
@@ -587,9 +584,7 @@ test.describe("Bubble menu", () => {
     expect(await getEditorHTML(page)).not.toMatch(/color.*220.*38.*38/);
   });
 
-  test("Bold button shows active state when text is bold", async ({
-    page,
-  }) => {
+  test("Bold button shows active state when text is bold", async ({ page }) => {
     await (await getEditor(page)).click();
     await page.keyboard.type("Bold text");
     await selectAll(page);
@@ -666,7 +661,7 @@ test.describe("Callout block", () => {
     await slashSelect(page, "callout");
     await page.keyboard.type("This is a callout");
     const html = await getEditorHTML(page);
-    expect(html).toContain("data-type=\"callout\"");
+    expect(html).toContain('data-type="callout"');
     expect(html).toContain("💡");
     expect(html).toContain("This is a callout");
   });
@@ -676,12 +671,12 @@ test.describe("Callout block", () => {
     await page.keyboard.type("Some info here");
     await page.keyboard.press("Control+Shift+c");
     const html = await getEditorHTML(page);
-    expect(html).toContain("data-type=\"callout\"");
+    expect(html).toContain('data-type="callout"');
     // Toggle back to paragraph
     await page.keyboard.press("Control+Shift+c");
     const html2 = await getEditorHTML(page);
     expect(html2).toContain("<p>");
-    expect(html2).not.toContain("data-type=\"callout\"");
+    expect(html2).not.toContain('data-type="callout"');
   });
 });
 
@@ -704,7 +699,7 @@ test.describe("Block handle", () => {
     await page.waitForTimeout(400);
 
     // Block handle should be visible
-    const handle = page.locator(".fixed.z-40");
+    const handle = page.getByTestId("block-handle");
     await expect(handle).toBeVisible();
     // Should have + and grip buttons
     expect(await handle.locator("button").count()).toBe(2);
@@ -723,7 +718,7 @@ test.describe("Block handle", () => {
     await page.mouse.move(box.x + box.width / 2, box.y + 20);
     await page.waitForTimeout(400);
 
-    const handle = page.locator(".fixed.z-40");
+    const handle = page.getByTestId("block-handle");
     // Click the + button (first button)
     await handle.locator("button").first().click();
     await page.waitForTimeout(200);
@@ -746,7 +741,7 @@ test.describe("Block handle", () => {
     await page.mouse.move(box.x + box.width / 2, box.y + 20);
     await page.waitForTimeout(400);
 
-    const gripBtn = page.locator(".fixed.z-40 button").nth(1);
+    const gripBtn = page.getByTestId("block-handle").locator("button").nth(1);
     await expect(gripBtn).toBeVisible();
     // Verify it has the grab cursor class
     await expect(gripBtn).toHaveClass(/cursor-grab/);
@@ -775,7 +770,7 @@ test.describe("Block handle", () => {
     );
     await page.waitForTimeout(500);
 
-    const grip = page.locator(".fixed.z-40 button").nth(1);
+    const grip = page.getByTestId("block-handle").locator("button").nth(1);
     await expect(grip).toBeVisible({ timeout: 5000 });
 
     const secondPara = page.locator(".verso-editor p").nth(1);
@@ -786,10 +781,7 @@ test.describe("Block handle", () => {
     if (!gripBox) throw new Error("Grip not found");
 
     // Mouse-based drag: mousedown on grip → move below second block → mouseup
-    await page.mouse.move(
-      gripBox.x + gripBox.width / 2,
-      gripBox.y + gripBox.height / 2,
-    );
+    await page.mouse.move(gripBox.x + gripBox.width / 2, gripBox.y + gripBox.height / 2);
     await page.mouse.down();
     await page.waitForTimeout(50);
 
@@ -820,7 +812,7 @@ test.describe("Block handle", () => {
     // Hover to show handle
     await page.mouse.move(box.x + box.width / 2, box.y + 20);
     await page.waitForTimeout(400);
-    const handle = page.locator(".fixed.z-40");
+    const handle = page.getByTestId("block-handle");
     await expect(handle).toBeVisible();
 
     // Move mouse far away
@@ -995,10 +987,7 @@ test.describe("Markdown paste", () => {
 
   test("inline formatting renders correctly", async ({ page }) => {
     await (await getEditor(page)).click();
-    await pasteMarkdown(
-      page,
-      "## Formatting\n\nThis has **bold** and *italic* and `code`.\n"
-    );
+    await pasteMarkdown(page, "## Formatting\n\nThis has **bold** and *italic* and `code`.\n");
     const html = await getEditorHTML(page);
     expect(html).toContain("<strong>bold</strong>");
     expect(html).toContain("<em>italic</em>");
@@ -1007,10 +996,7 @@ test.describe("Markdown paste", () => {
 
   test("task lists render correctly", async ({ page }) => {
     await (await getEditor(page)).click();
-    await pasteMarkdown(
-      page,
-      "## Tasks\n\n- [x] Done\n- [ ] Not done\n"
-    );
+    await pasteMarkdown(page, "## Tasks\n\n- [x] Done\n- [ ] Not done\n");
     const html = await getEditorHTML(page);
     expect(html).toContain("taskList");
   });
@@ -1128,7 +1114,10 @@ test.describe("Sidebar", () => {
     await expect(sidebar).not.toBeVisible();
 
     // Expand button should appear
-    const expandBtn = page.locator("button").filter({ has: page.locator("svg") }).first();
+    const expandBtn = page
+      .locator("button")
+      .filter({ has: page.locator("svg") })
+      .first();
     await expandBtn.click();
     await page.waitForTimeout(400);
 

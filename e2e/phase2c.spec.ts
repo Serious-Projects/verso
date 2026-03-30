@@ -20,7 +20,7 @@ async function insertBlock(
     await page.waitForTimeout(80);
   }
   // Wait for the slash menu to be visible
-  const menu = page.locator(".fixed.z-50.w-72");
+  const menu = page.getByTestId("slash-menu");
   await menu.waitFor({ state: "visible", timeout: 5000 });
   await page.waitForTimeout(200);
   await page.keyboard.press("Enter");
@@ -133,9 +133,26 @@ test.describe("Image block", () => {
     await page.locator('[data-testid="image-block-embed-btn"]').first().click();
     await expect(page.locator('[data-testid="image-block-img"]').first()).toBeVisible();
 
-    // Press Enter after the block to create a new paragraph, then insert second block
+    // Focus the editor and move cursor past the image block into a text paragraph
+    await page.locator(".verso-editor").click();
+    await page.keyboard.press("Control+End");
+    await page.waitForTimeout(100);
     await page.keyboard.press("Enter");
-    await insertBlock(page, "Image");
+    await page.waitForTimeout(200);
+    // Insert second image block without clicking editor center (which would hit the first image)
+    await page.keyboard.type("/");
+    await page.waitForTimeout(300);
+    for (const char of "Image") {
+      await page.keyboard.type(char);
+      await page.waitForTimeout(80);
+    }
+    const menu = page.getByTestId("slash-menu");
+    await menu.waitFor({ state: "visible", timeout: 5000 });
+    await page.waitForTimeout(200);
+    await page.keyboard.press("Enter");
+    await page.waitForTimeout(300);
+    // Wait for the new input to appear
+    await expect(page.locator('[data-testid="image-block-input"]')).toBeVisible({ timeout: 5000 });
     await page.locator('[data-testid="image-block-input"]').fill("https://picsum.photos/600/300");
     await page.locator('[data-testid="image-block-embed-btn"]').click();
 

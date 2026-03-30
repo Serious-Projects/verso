@@ -2,13 +2,7 @@ import { create } from "zustand";
 import { persist } from "zustand/middleware";
 
 import type { Page, PageMap } from "@/types/page";
-
-function generateId(): string {
-  if (typeof crypto !== "undefined" && crypto.randomUUID) {
-    return crypto.randomUUID();
-  }
-  return Math.random().toString(36).slice(2, 18);
-}
+import { generateId } from "@/lib/utils";
 
 function makePage(parentId: string | null = null): Page {
   return {

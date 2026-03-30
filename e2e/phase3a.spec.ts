@@ -19,7 +19,7 @@ async function insertBlock(
     await page.keyboard.type(char);
     await page.waitForTimeout(80);
   }
-  const menu = page.locator(".fixed.z-50.w-72");
+  const menu = page.getByTestId("slash-menu");
   await menu.waitFor({ state: "visible", timeout: 5000 });
   await page.waitForTimeout(200);
   await page.keyboard.press("Enter");

@@ -13,13 +13,7 @@ import type {
   SelectOption,
   SortRule,
 } from "@/types/database";
-
-function generateId(): string {
-  if (typeof crypto !== "undefined" && crypto.randomUUID) {
-    return crypto.randomUUID();
-  }
-  return Math.random().toString(36).slice(2, 18);
-}
+import { generateId } from "@/lib/utils";
 
 const DEFAULT_PROPERTY_WIDTH = 200;
 const TITLE_PROPERTY_WIDTH = 280;

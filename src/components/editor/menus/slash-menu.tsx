@@ -274,6 +274,7 @@ export function SlashMenu({ editor }: { editor: Editor }) {
   return (
     <div
       ref={menuRef}
+      data-testid="slash-menu"
       className="fixed z-50 w-72 max-h-80 overflow-y-auto rounded-lg border border-border bg-popover p-1 shadow-lg animate-in fade-in-0 slide-in-from-top-2"
       style={{ top: position.top, left: position.left }}
     >

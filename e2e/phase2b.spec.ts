@@ -194,7 +194,10 @@ test.describe("Search", () => {
     await freshWorkspace(page);
     await page.keyboard.press("Control+k");
     await expect(page.getByTestId("search-modal")).toBeVisible();
-    await page.getByTestId("search-backdrop").click({ position: { x: 10, y: 10 } });
+    // Click right side of backdrop to avoid sidebar overlay (z-50) intercepting
+    const backdrop = page.getByTestId("search-backdrop");
+    const box = await backdrop.boundingBox();
+    await backdrop.click({ position: { x: box!.width - 20, y: box!.height / 2 } });
     await expect(page.getByTestId("search-modal")).not.toBeVisible();
   });
 

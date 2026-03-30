@@ -232,6 +232,7 @@ export function BlockHandle({ editor }: { editor: Editor }) {
       {visible && (
         <div
           ref={handleRef}
+          data-testid="block-handle"
           className="fixed z-40 flex -translate-x-full items-center gap-0.5 pr-1 transition-opacity"
           style={{ top: position.top, left: position.left }}
           onMouseEnter={clearHideTimeout}
