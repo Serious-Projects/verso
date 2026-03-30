@@ -161,19 +161,20 @@ export function Editor({ pageId }: EditorProps) {
   const [showIconPicker, setShowIconPicker] = useState(false);
   const [titleIsEmpty, setTitleIsEmpty] = useState(true);
 
-  // Memoized initial title HTML — only recomputes when page or hydration state changes.
-  // Using dangerouslySetInnerHTML (instead of imperative textContent) prevents React
-  // from clearing the h1 content during reconciliation (React removes DOM children
-  // that weren't rendered via JSX on subsequent re-renders).
-  const initialTitleHtml = useMemo(() => {
-    if (!hasHydrated) return "";
-    return usePageStore.getState().pages[pageId]?.title ?? "";
-  }, [hasHydrated, pageId]);
-
-  // Sync titleIsEmpty whenever the initial title changes (page switch or hydration).
-  useEffect(() => {
-    setTitleIsEmpty(initialTitleHtml.trim().length === 0);
-  }, [initialTitleHtml]);
+  // Set title via callback ref — React never controls the content after mount.
+  // This prevents cursor reset on re-render.
+  const titleLoadedForRef = useRef<string | null>(null);
+  const titleCallbackRef = useCallback(
+    (node: HTMLHeadingElement | null) => {
+      if (!node || !hasHydrated) return;
+      if (titleLoadedForRef.current === pageId) return;
+      titleLoadedForRef.current = pageId;
+      const title = usePageStore.getState().pages[pageId]?.title ?? "";
+      node.textContent = title;
+      setTitleIsEmpty(title.trim().length === 0);
+    },
+    [hasHydrated, pageId],
+  );
 
   // Load content once hydration is complete, and whenever pageId changes
   useEffect(() => {
@@ -402,10 +403,12 @@ export function Editor({ pageId }: EditorProps) {
 
         {/* Title */}
         <h1
-          ref={titleRef}
+          ref={(node) => {
+            (titleRef as React.MutableRefObject<HTMLHeadingElement | null>).current = node;
+            titleCallbackRef(node);
+          }}
           contentEditable
           suppressContentEditableWarning
-          dangerouslySetInnerHTML={{ __html: initialTitleHtml }}
           onInput={handleTitleInput}
           onKeyDown={handleTitleKeyDown}
           data-testid="page-title"
