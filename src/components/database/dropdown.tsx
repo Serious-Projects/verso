@@ -29,6 +29,7 @@ interface DropdownProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
   align?: "left" | "right";
+  center?: boolean;
   width?: string;
   children: React.ReactNode;
   testId?: string;
@@ -40,6 +41,7 @@ export function Dropdown({
   open,
   onOpenChange,
   align = "left",
+  center = true,
   width = "w-56",
   children,
   testId,
@@ -49,6 +51,7 @@ export function Dropdown({
   const { triggerRef, pos, recompute } = useDropdownPosition<HTMLDivElement>({
     align,
     widthPx,
+    center,
   });
 
   useEffect(() => {

@@ -94,6 +94,7 @@ export function DatePicker({ value, onChange, testId = "cell-date" }: DatePicker
         }
       }}
       width="w-64"
+      center={false}
       testId="date-picker-dropdown"
       trigger={
         <button

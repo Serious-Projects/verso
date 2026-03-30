@@ -67,6 +67,7 @@ export function MultiSelectCell({
     <Dropdown
       open={open}
       onOpenChange={setOpen}
+      center={false}
       testId="multi-select-dropdown"
       trigger={
         <button

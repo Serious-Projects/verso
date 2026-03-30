@@ -56,6 +56,7 @@ export function SelectCell({
     <Dropdown
       open={open}
       onOpenChange={setOpen}
+      center={false}
       testId="select-dropdown"
       trigger={
         <button

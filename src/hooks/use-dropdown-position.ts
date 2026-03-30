@@ -11,14 +11,12 @@ interface Position {
 }
 
 interface UseDropdownPositionOptions {
-  /** Where to align horizontally relative to trigger */
   align?: "left" | "right";
-  /** Dropdown width in pixels */
   widthPx: number;
-  /** Gap between trigger and dropdown */
   offset?: number;
-  /** "below" opens under trigger, "right" opens to the right (for submenus) */
   placement?: "below" | "right";
+  /** Center dropdown under trigger (default true). Set false for table cell dropdowns. */
+  center?: boolean;
 }
 
 export function useDropdownPosition<T extends HTMLElement = HTMLDivElement>({
@@ -26,6 +24,7 @@ export function useDropdownPosition<T extends HTMLElement = HTMLDivElement>({
   widthPx,
   offset = 4,
   placement = "below",
+  center = true,
 }: UseDropdownPositionOptions) {
   const triggerRef = useRef<T>(null);
   const [pos, setPos] = useState<Position>({ top: 0, left: 0, arrowLeft: 16, flipped: false });
@@ -61,10 +60,8 @@ export function useDropdownPosition<T extends HTMLElement = HTMLDivElement>({
       }
     }
 
-    // Center dropdown under trigger (only when align is "left", i.e. not explicitly right-aligned)
-    if (placement === "below" && align === "left") {
-      const centered = rect.left + rect.width / 2 - widthPx / 2;
-      left = centered;
+    if (placement === "below" && center && align === "left") {
+      left = rect.left + rect.width / 2 - widthPx / 2;
     }
 
     // Clamp to viewport
