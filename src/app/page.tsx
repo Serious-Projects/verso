@@ -127,9 +127,22 @@ function Hero() {
       </div>
 
       <div className="relative mx-auto mt-16 max-w-4xl overflow-hidden rounded-2xl border border-border/20 shadow-2xl">
-        <div className="aspect-video bg-gradient-to-br from-muted/30 via-muted/10 to-background flex items-center justify-center">
-          <p className="text-sm text-muted-foreground/30">App screenshot placeholder</p>
-        </div>
+        <Image
+          src="/images/hero-screenshot.png"
+          alt="Verso workspace showing a block editor with databases, kanban boards, and calendar views"
+          width={1920}
+          height={1080}
+          className="w-full dark:hidden"
+          priority
+        />
+        <Image
+          src="/images/hero-screenshot-dark.png"
+          alt="Verso workspace showing a block editor with databases, kanban boards, and calendar views"
+          width={1920}
+          height={1080}
+          className="hidden w-full dark:block"
+          priority
+        />
       </div>
     </section>
   );

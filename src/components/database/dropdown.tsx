@@ -78,7 +78,11 @@ export function Dropdown({
               data-testid={testId}
             >
               <div
-                className="absolute -top-1.25 h-2.5 w-2.5 rotate-45 border-l border-t border-border/50 bg-popover/95"
+                className={`absolute h-2.5 w-2.5 rotate-45 border-border/50 bg-popover/95 ${
+                  pos.flipped
+                    ? "-bottom-1.25 border-b border-r"
+                    : "-top-1.25 border-l border-t"
+                }`}
                 style={{ left: pos.arrowLeft - 5 }}
               />
               {children}
